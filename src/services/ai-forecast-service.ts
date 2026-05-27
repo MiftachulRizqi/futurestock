@@ -18,45 +18,82 @@ type SalesSummaryItem = {
   last_sold_at: string | null;
 };
 
-function buildForecastPrompt(salesSummary: SalesSummaryItem[]) {
+function buildForecastPrompt(salesSummary: SalesSummaryItem[], currentDate: string) {
   return `
-Kamu adalah AI inventory forecasting analyst untuk aplikasi FutureStock.
+Kamu adalah AI inventory forecasting analyst senior untuk aplikasi FutureStock di Indonesia.
+
+TANGGAL HARI INI: ${currentDate}
 
 Tugas AI:
-1. Menganalisis pola penjualan produk.
-2. Memprediksi barang yang berpotensi laku minggu depan.
-3. Memberikan rekomendasi jumlah stok ideal.
-4. Memberikan warning overstock.
-5. Mendeteksi produk yang berisiko menjadi dead stock.
+1. Analisis apakah ada hari besar keagamaan, nasional, atau event musiman di Indonesia dalam 30 hari ke depan dari tanggal hari ini.
+2. Jika ADA HARI BESAR: Tentukan nama, prediksi multiplier demand (contoh: 1.5x), dan kategori produk yang terdampak. Kalikan hasil prediksi demand produk tersebut dengan multiplier. Set holiday_affected menjadi true.
+3. Jika TIDAK ADA HARI BESAR: Set has_upcoming_holiday menjadi false, set semua multiplier menjadi null, dan pastikan holiday_affected pada semua produk diset false.
+4. Analisis tren penjualan (sold_last_7_days vs sold_last_30_days) untuk memprediksi barang laku minggu depan (predicted_demand_next_week).
+5. Berikan rekomendasi stok ideal dan warning overstock.
+6. Berikan rekomendasi promo kreatif khusus untuk produk overstock di bagian "promo_bundles".
 
-Gunakan data berikut:
-- sold_last_7_days untuk tren jangka pendek.
-- sold_last_30_days untuk tren bulanan.
-- average_daily_sales_30d untuk estimasi demand.
-- current_stock dan min_stock untuk rekomendasi restock.
-- last_sold_at untuk risiko dead stock.
-
-Aturan:
-- Jawab hanya JSON valid.
-- Jangan gunakan markdown.
+Aturan Ketat:
+- Jawab HANYA menggunakan format JSON valid. Jangan gunakan markdown (seperti \`\`\`json).
 - Gunakan Bahasa Indonesia.
-- predicted_demand_next_week sebaiknya mendekati average_daily_sales_30d * 7, disesuaikan tren 7 hari terakhir.
-- recommended_stock minimal cukup untuk 2 minggu demand.
-- recommended_restock_qty = max(recommended_stock - current_stock, 0).
-- overstock_warning true jika stok jauh lebih besar dari demand 30 hari.
-- dead_stock_risk high jika tidak ada penjualan lama atau total_sold sangat rendah.
-- confidence_score 0 sampai 100.
+- predicted_demand_next_week: Analisis tren asli produk, JANGAN sekadar mengalikan average 30 hari.
+- promo_recommendation: HARUS BERUPA TEKS SINGKAT (STRING), BUKAN OBJEK.
 
-Data sales summary:
+Data sales summary (JSON):
 ${JSON.stringify(salesSummary, null, 2)}
 
-Format JSON:
+Format Output JSON:
 {
   "summary": "string",
-  "top_selling_predictions": [],
-  "restock_recommendations": [],
-  "overstock_warnings": [],
-  "dead_stock_risks": []
+  "holiday_context": {
+    "has_upcoming_holiday": boolean,
+    "upcoming_holiday": "string atau null",
+    "days_until_holiday": "number atau null",
+    "holiday_category": "string atau null",
+    "impact_multiplier": "number atau null",
+    "affected_categories": [],
+    "recommendation": "string atau null"
+  },
+  "promo_bundles": [
+    {
+      "primary_product_id": "string",
+      "primary_product_name": "string",
+      "secondary_product_id": "string atau null",
+      "secondary_product_name": "string atau null",
+      "promo_type": "bundling|tebus_murah|discount",
+      "promo_description": "string",
+      "suggested_price": "number atau null",
+      "discount_percentage": "number atau null",
+      "urgency_level": "high|medium|low",
+      "estimated_clearance_days": "number"
+    }
+  ],
+  "top_selling_predictions": [ /* Gunakan Format Produk AI di bawah */ ],
+  "restock_recommendations": [ /* Gunakan Format Produk AI di bawah */ ],
+  "overstock_warnings": [ /* Gunakan Format Produk AI di bawah */ ],
+  "dead_stock_risks": [ /* Gunakan Format Produk AI di bawah */ ]
+}
+
+Format Produk AI (UNTUK MENGISI KE-4 ARRAY DI ATAS):
+{
+  "product_id": "string",
+  "name": "string",
+  "sku": "string",
+  "category": "string",
+  "current_stock": 0,
+  "min_stock": 0,
+  "predicted_demand_next_week": 0,
+  "recommended_stock": 0,
+  "recommended_restock_qty": 0,
+  "overstock_warning": false,
+  "dead_stock_risk": "low|medium|high",
+  "sales_potential": "low|medium|high",
+  "confidence_score": 0,
+  "reason": "string",
+  "holiday_affected": false,
+  "holiday_multiplier": null,
+  "holiday_name": null,
+  "promo_recommendation": "string (HANYA TEKS DESKRIPSI, JANGAN MASUKKAN OBJEK PROMO KE SINI)",
+  "promo_type": "bundling|tebus_murah|discount|null"
 }
 `;
 }
@@ -66,7 +103,17 @@ export async function generateAiForecast(
 ): Promise<AiForecastResult> {
   if (salesSummary.length === 0) {
     return {
-      summary: "Belum ada data untuk dianalisis.",
+      summary: "Belum ada data penjualan untuk dianalisis oleh AI.",
+      holiday_context: {
+        has_upcoming_holiday: false,
+        upcoming_holiday: null,
+        days_until_holiday: null,
+        holiday_category: null,
+        impact_multiplier: null,
+        affected_categories: [],
+        recommendation: null,
+      },
+      promo_bundles: [],
       top_selling_predictions: [],
       restock_recommendations: [],
       overstock_warnings: [],
@@ -74,9 +121,16 @@ export async function generateAiForecast(
     };
   }
 
+  const currentDate = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   const response = await gemini.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: buildForecastPrompt(salesSummary),
+    contents: buildForecastPrompt(salesSummary, currentDate),
     config: {
       responseMimeType: "application/json",
     },
@@ -85,7 +139,7 @@ export async function generateAiForecast(
   const text = response.text;
 
   if (!text) {
-    throw new Error("Gemini tidak mengembalikan hasil analisis.");
+    throw new Error("Gemini gagal mengembalikan hasil analisis JSON.");
   }
 
   return JSON.parse(text) as AiForecastResult;

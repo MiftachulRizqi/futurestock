@@ -1,9 +1,6 @@
 import { differenceInHours } from "date-fns";
-import { generateAiForecast } from "@/services/ai-forecast-service";
-import {
-  getLatestAiForecast,
-  saveAiForecast,
-} from "@/services/ai-cache-service";
+import { generateAiForecast } from "./ai-forecast-service";
+import { getLatestAiForecast, saveAiForecast } from "./ai-cache-service";
 import type { AiForecastResult } from "@/types/ai-forecast";
 
 type SalesSummaryItem = {
@@ -26,6 +23,26 @@ type SalesSummaryItem = {
 function createFallbackForecast(
   salesSummary: SalesSummaryItem[]
 ): AiForecastResult {
+  const promoBundles = salesSummary
+    .filter(
+      (item) =>
+        item.current_stock > item.min_stock * 5 &&
+        item.sold_last_30_days <= item.min_stock
+    )
+    .slice(0, 3)
+    .map((item) => ({
+      primary_product_id: item.product_id,
+      primary_product_name: item.name,
+      secondary_product_id: undefined,
+      secondary_product_name: undefined,
+      promo_type: "discount" as const,
+      promo_description: `Diskon ${Math.floor(Math.random() * 20) + 10}% untuk ${item.name}`,
+      suggested_price: Math.floor(item.price * 0.8),
+      discount_percentage: Math.floor(Math.random() * 20) + 10,
+      urgency_level: (item.current_stock > item.min_stock * 10 ? "high" : "medium") as "high" | "medium" | "low",
+      estimated_clearance_days: Math.ceil(item.current_stock / Math.max(item.average_daily_sales_30d, 1)),
+    }));
+
   const restockItems = salesSummary
     .filter((item) => item.current_stock <= item.min_stock)
     .map((item) => ({
@@ -45,8 +62,8 @@ function createFallbackForecast(
       dead_stock_risk: "low" as const,
       sales_potential: item.sold_last_7_days > 0 ? ("medium" as const) : ("low" as const),
       confidence_score: 55,
-      reason:
-        "Analisis fallback digunakan karena Gemini sedang terkena limit quota. Rekomendasi dihitung dari stok minimum dan histori penjualan lokal.",
+      holiday_affected: false,
+      reason: "Analisis fallback berbasis data transaksi lokal tanpa API AI.",
     }));
 
   const overstockItems = salesSummary
@@ -69,8 +86,10 @@ function createFallbackForecast(
       dead_stock_risk: "medium" as const,
       sales_potential: "low" as const,
       confidence_score: 50,
-      reason:
-        "Stok jauh lebih tinggi dari minimum, sementara histori penjualan masih rendah. Produk perlu dipantau agar tidak menjadi overstock.",
+      holiday_affected: false,
+      promo_recommendation: `Diskon 15-20% untuk menghabiskan stok berlebih.`,
+      promo_type: "discount" as const,
+      reason: "Stok jauh lebih tinggi dari minimum.",
     }));
 
   const deadStockItems = salesSummary
@@ -89,8 +108,8 @@ function createFallbackForecast(
       dead_stock_risk: "high" as const,
       sales_potential: "low" as const,
       confidence_score: 50,
-      reason:
-        "Produk belum memiliki penjualan tercatat atau statusnya nonaktif. Risiko dead stock perlu diperiksa manual.",
+      holiday_affected: false,
+      reason: "Produk belum memiliki penjualan tercatat.",
     }));
 
   const topSellingItems = [...salesSummary]
@@ -117,13 +136,22 @@ function createFallbackForecast(
       sales_potential:
         item.sold_last_7_days > 5 ? ("high" as const) : ("medium" as const),
       confidence_score: 60,
-      reason:
-        "Produk memiliki histori penjualan relatif lebih tinggi dibanding produk lain.",
+      holiday_affected: false,
+      reason: "Produk memiliki histori penjualan tinggi berdasarkan fallback data.",
     }));
 
   return {
-    summary:
-      "Gemini sedang terkena limit quota, jadi FutureStock menampilkan analisis fallback berbasis data transaksi lokal.",
+    summary: "Sistem menampilkan analisis fallback berbasis data transaksi lokal karena API sedang tidak tersedia.",
+    holiday_context: {
+      has_upcoming_holiday: false,
+      upcoming_holiday: null,
+      days_until_holiday: null,
+      holiday_category: null,
+      impact_multiplier: null,
+      affected_categories: [],
+      recommendation: null,
+    },
+    promo_bundles: promoBundles,
     top_selling_predictions: topSellingItems,
     restock_recommendations: restockItems,
     overstock_warnings: overstockItems,

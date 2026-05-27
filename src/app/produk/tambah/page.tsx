@@ -1,8 +1,16 @@
+import { redirect } from "next/navigation";
 import { ProductForm } from "@/components/products/product-form";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { getCurrentUser } from "@/services/auth-service";
 import { createProductAction } from "../actions";
 
-export default function TambahProdukPage() {
+export default async function TambahProdukPage() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">

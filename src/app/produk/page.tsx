@@ -1,21 +1,27 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
+
 import { getProducts } from "@/services/product-service";
+
 import { ProductTable } from "@/components/products/product-table";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
+
 import { Button } from "@/components/ui/button";
 
 export default async function ProdukPage() {
   const products = await getProducts();
 
   return (
-    <DashboardLayout>
+    <DashboardLayout products={products}>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+
+        <div className="flex justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Produk</h1>
-            <p className="text-sm text-slate-400">
-              Kelola produk real dari database FutureStock.
+            <h1 className="text-3xl font-bold text-white">
+              Produk
+            </h1>
+            <p className="text-slate-400">
+              Kelola semua produk
             </p>
           </div>
 

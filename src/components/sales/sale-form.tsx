@@ -135,6 +135,11 @@ export function SaleForm({ products, action }: SaleFormProps) {
                   min={1}
                   max={product?.stock ?? 999999}
                   value={row.quantity}
+                  onInput={(event) => {
+                    event.currentTarget.value = normalizeNumberInput(
+                      event.currentTarget.value
+                    );
+                  }}
                   onChange={(event) =>
                     updateRow(row.id, {
                       quantity: Number(event.target.value),
@@ -181,4 +186,12 @@ export function SaleForm({ products, action }: SaleFormProps) {
       </div>
     </form>
   );
+}
+
+function normalizeNumberInput(value: string) {
+  if (value === "") {
+    return value;
+  }
+
+  return value.replace(/^0+(?=\d)/, "");
 }

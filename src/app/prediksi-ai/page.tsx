@@ -1,6 +1,7 @@
-import { Bot, BrainCircuit } from "lucide-react";
+import { Bot, BrainCircuit, Calendar, Sparkles } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GlassPanel } from "@/components/shared/glass-panel";
+import { OverstockPromoAlert } from "@/components/dashboard/overstock-promo-alert";
 import { getProducts } from "@/services/product-service";
 import { getSales } from "@/services/sales-service";
 import { getSalesSummaryForAi } from "@/lib/helpers/sales-summary";
@@ -49,7 +50,7 @@ export default async function PrediksiAiPage() {
           <div className="flex items-start gap-3">
             <BrainCircuit className="mt-1 h-5 w-5 shrink-0 text-cyan-300" />
 
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl font-bold text-white">Ringkasan AI</h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -58,6 +59,10 @@ export default async function PrediksiAiPage() {
             </div>
           </div>
         </GlassPanel>
+
+        {forecast.promo_bundles && forecast.promo_bundles.length > 0 && (
+          <OverstockPromoAlert promoBundles={forecast.promo_bundles} />
+        )}
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ForecastSection
@@ -164,6 +169,32 @@ function ForecastSection({
                 />
               </div>
 
+              {item.holiday_affected ? (
+                <div className="mt-4 rounded-xl border border-violet-400/30 bg-violet-400/10 p-3 text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="h-4 w-4 text-violet-300" />
+                    <span className="font-semibold text-violet-200">
+                      Terdampak {item.holiday_name}
+                    </span>
+                  </div>
+                  <p className="text-violet-300">
+                    Demand ditingkatkan {item.holiday_multiplier}x karena hari besar
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl border border-slate-700/50 bg-slate-800/30 p-3 text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="h-4 w-4 text-slate-400" />
+                    <span className="font-semibold text-slate-300">
+                      Tidak ada hari besar terdekat
+                    </span>
+                  </div>
+                  <p className="text-slate-400">
+                    Prediksi demand berjalan normal berdasarkan histori tren penjualan.
+                  </p>
+                </div>
+              )}
+
               {item.overstock_warning ? (
                 <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">
                   Produk ini terindikasi overstock. Pertimbangkan promo,
@@ -171,8 +202,18 @@ function ForecastSection({
                 </div>
               ) : null}
 
+              {/* SABUK PENGAMAN: Jika AI malah kirim object, kita ekstrak stringnya */}
+              {item.promo_recommendation ? (
+                <div className="mt-4 rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-3 text-sm text-cyan-200">
+                  <span className="font-medium">💡 Saran Promo:</span>{" "}
+                  {typeof item.promo_recommendation === "string" 
+                    ? item.promo_recommendation 
+                    : (item.promo_recommendation as any).promo_description || "Lihat rekomendasi promo di atas"}
+                </div>
+              ) : null}
+
               <p className="mt-4 text-sm leading-6 text-slate-400">
-                {item.reason}
+                {typeof item.reason === "string" ? item.reason : "Analisis AI."}
               </p>
             </div>
           ))
@@ -204,7 +245,7 @@ function translateRisk(value: AiForecastProduct["dead_stock_risk"]) {
     high: "Tinggi",
   };
 
-  return map[value];
+  return map[value] || "Tidak diketahui";
 }
 
 function translatePotential(value: AiForecastProduct["sales_potential"]) {
@@ -214,5 +255,5 @@ function translatePotential(value: AiForecastProduct["sales_potential"]) {
     high: "Tinggi",
   };
 
-  return map[value];
+  return map[value] || "Tidak diketahui";
 }
