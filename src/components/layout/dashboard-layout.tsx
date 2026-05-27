@@ -14,6 +14,11 @@ type DashboardLayoutProps = {
   userName?: string;
   storeName?: string;
   role?: string;
+
+  products?: {
+    id: string;
+    name: string;
+  }[];
 };
 
 export function DashboardLayout({
@@ -21,8 +26,10 @@ export function DashboardLayout({
   userName,
   storeName,
   role,
+  products = [],
 }: DashboardLayoutProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
 
   return (
     <div className="min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -31,26 +38,37 @@ export function DashboardLayout({
       <AppSidebar />
 
       {mobileOpen ? (
-        <MobileSidebar onClose={() => setMobileOpen(false)} />
+        <MobileSidebar
+          onClose={() => setMobileOpen(false)}
+        />
       ) : null}
 
       <div className="relative z-10 lg:ml-72">
         <AppHeader
-          onMenuClick={() => setMobileOpen(true)}
+          onMenuClick={() =>
+            setMobileOpen(true)
+          }
           userName={userName}
           storeName={storeName}
           role={role}
+          products={products}
         />
 
         <main className="min-h-[calc(100vh-80px)] p-4 md:p-6">
-          <div className="mx-auto max-w-7xl">{children}</div>
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>
   );
 }
 
-function MobileSidebar({ onClose }: { onClose: () => void }) {
+function MobileSidebar({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const pathname = usePathname();
 
   return (
@@ -70,14 +88,19 @@ function MobileSidebar({ onClose }: { onClose: () => void }) {
             className="flex items-center gap-3"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-500 shadow-lg shadow-cyan-500/20">
-              <span className="font-bold text-white">FS</span>
+              <span className="font-bold text-white">
+                FS
+              </span>
             </div>
 
             <div>
               <p className="text-lg font-bold tracking-tight text-white">
                 FutureStock
               </p>
-              <p className="text-xs text-cyan-300">AI Inventory SaaS</p>
+
+              <p className="text-xs text-cyan-300">
+                AI Inventory SaaS
+              </p>
             </div>
           </Link>
 
@@ -94,8 +117,12 @@ function MobileSidebar({ onClose }: { onClose: () => void }) {
         <nav className="mt-8 space-y-2">
           {dashboardNavigation.map((item) => {
             const Icon = item.icon;
+
             const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+              pathname === item.href ||
+              pathname.startsWith(
+                `${item.href}/`
+              );
 
             return (
               <Link
@@ -113,9 +140,12 @@ function MobileSidebar({ onClose }: { onClose: () => void }) {
                 <Icon
                   className={cn(
                     "h-5 w-5",
-                    active ? "text-cyan-300" : "text-slate-500"
+                    active
+                      ? "text-cyan-300"
+                      : "text-slate-500"
                   )}
                 />
+
                 <span>{item.title}</span>
               </Link>
             );

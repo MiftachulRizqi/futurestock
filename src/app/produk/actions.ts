@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/services/auth-service";
 import {
   createProduct,
   updateProduct,
@@ -12,6 +13,14 @@ import { productSchema } from "@/lib/validations/product";
 
 const PRODUCT_IMAGE_BUCKET = "product-images";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+async function requireActiveSession() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+}
 
 async function uploadProductImage(file: File) {
   const supabase = await createClient();
@@ -52,6 +61,8 @@ async function uploadProductImage(file: File) {
 }
 
 export async function createProductAction(formData: FormData) {
+  await requireActiveSession();
+
   const image = formData.get("image");
 
   const uploadedImageUrl =
@@ -79,6 +90,8 @@ export async function createProductAction(formData: FormData) {
 }
 
 export async function updateProductAction(id: string, formData: FormData) {
+  await requireActiveSession();
+
   const currentProduct = await getProductById(id);
 
   if (!currentProduct) {
@@ -112,6 +125,8 @@ export async function updateProductAction(id: string, formData: FormData) {
 }
 
 export async function deleteProductAction(id: string) {
+  await requireActiveSession();
+
   await deleteProduct(id);
 
   redirect("/produk");
