@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUser } from "@/services/auth-service";
 import { createProductAction } from "../actions";
 
+
 export default async function TambahProdukPage() {
   const user = await getCurrentUser();
 
