@@ -68,7 +68,7 @@ export function getLatestPredictionTotal(points: SalesForecastPoint[]) {
 
   return points
     .filter((point) => point.date === latestDate)
-    .reduce((total, point) => total + point.prediction, 0);
+    .reduce((total, point) => total + (point.prediction ?? 0), 0);
 }
 
 function createRangePoints(
@@ -87,7 +87,7 @@ function createRangePoints(
     .flatMap((product) => {
       const history: number[] = [];
 
-      return periods.map((period) => {
+      const periodPoints = periods.map((period) => {
         const actual =
           quantitiesByProductAndPeriod.get(`${product.id}:${period.key}`) ?? 0;
         const prediction = getMovingAveragePrediction(history);
@@ -103,9 +103,31 @@ function createRangePoints(
           productName: product.name,
           actual,
           prediction,
-          error: actual - prediction,
+          error: prediction === null ? null : actual - prediction,
         };
       });
+
+      const nextPeriod = getNextPeriod(range, periods[periods.length - 1]);
+      const nextPrediction = getMovingAveragePrediction(history);
+
+      if (!nextPeriod || nextPrediction === null) {
+        return periodPoints;
+      }
+
+      return [
+        ...periodPoints,
+        {
+          id: `${range}-${nextPeriod.key}-${product.id}`,
+          date: nextPeriod.key,
+          label: nextPeriod.label,
+          period: nextPeriod.period,
+          category: product.category,
+          productName: product.name,
+          actual: null,
+          prediction: nextPrediction,
+          error: null,
+        },
+      ];
     });
 }
 
@@ -178,11 +200,13 @@ function getProductMetaById(products: Product[], sales: SaleWithItems[]) {
 }
 
 function getMovingAveragePrediction(history: number[]) {
-  if (history.length === 0) {
-    return 0;
+  const usableHistory = history.filter((value) => value > 0);
+
+  if (usableHistory.length === 0) {
+    return null;
   }
 
-  const recentHistory = history.slice(-3);
+  const recentHistory = usableHistory.slice(-3);
   const average =
     recentHistory.reduce((total, value) => total + value, 0) /
     recentHistory.length;
@@ -245,6 +269,48 @@ function createEmptyForecastData(): ForecastChartData {
     daily: [],
     weekly: [],
     monthly: [],
+  };
+}
+
+function getNextPeriod(range: ForecastRange, current?: PeriodBucket) {
+  if (!current) {
+    return null;
+  }
+
+  if (range === "daily") {
+    const date = addDays(current.start, 1);
+
+    return {
+      key: formatDateKey(date),
+      label: formatShortDate(date),
+      period: formatLongDate(date),
+      start: startOfDay(date),
+      end: endOfDay(date),
+    };
+  }
+
+  if (range === "weekly") {
+    const start = addDays(current.start, 7);
+    const end = endOfDay(addDays(start, 6));
+
+    return {
+      key: formatDateKey(start),
+      label: "Minggu depan",
+      period: `${formatShortDate(start)} - ${formatShortDate(end)}`,
+      start,
+      end,
+    };
+  }
+
+  const start = addMonths(current.start, 1);
+  const end = endOfMonth(start);
+
+  return {
+    key: formatMonthKey(start),
+    label: formatMonthLabel(start),
+    period: formatMonthPeriod(start),
+    start,
+    end,
   };
 }
 

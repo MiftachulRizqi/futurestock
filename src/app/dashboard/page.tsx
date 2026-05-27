@@ -79,9 +79,9 @@ export default async function DashboardPage() {
           />
 
           <StatCard
-            title="Prediksi Minggu Ini"
+            title="Prediksi Periode Depan"
             value={formatCompactNumber(weeklyPrediction)}
-            description="Estimasi unit terjual dari model"
+            description="Estimasi unit terjual berikutnya"
             icon={TrendingUp}
             tone="emerald"
           />

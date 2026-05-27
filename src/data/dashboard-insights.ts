@@ -7,9 +7,9 @@ export type SalesForecastPoint = {
   period: string;
   category: string;
   productName: string;
-  actual: number;
-  prediction: number;
-  error: number;
+  actual: number | null;
+  prediction: number | null;
+  error: number | null;
 };
 
 export const salesRangeLabels: Record<ForecastRange, string> = {
