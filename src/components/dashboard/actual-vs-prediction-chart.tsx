@@ -25,7 +25,6 @@ import {
 import type { TooltipContentProps } from "recharts";
 
 import {
-  actualVsPredictionData,
   forecastCategories,
   salesRangeLabels,
   type ForecastRange,
@@ -44,13 +43,18 @@ type AggregatedForecastPoint = {
   date: string;
   label: string;
   period: string;
-  actual: number;
-  prediction: number;
-  error: number;
+  actual: number | null;
+  prediction: number | null;
+  error: number | null;
 };
 
 const allCategoriesLabel = "Semua";
 const rangeOptions: ForecastRange[] = ["daily", "weekly", "monthly"];
+const emptyForecastData: Record<ForecastRange, SalesForecastPoint[]> = {
+  daily: [],
+  weekly: [],
+  monthly: [],
+};
 
 const chartColors = {
   actual: "#22c55e",
@@ -59,7 +63,7 @@ const chartColors = {
 };
 
 export function ActualVsPredictionChart({
-  data = actualVsPredictionData,
+  data = emptyForecastData,
   defaultRange = "weekly",
   isLoading = false,
   className,
@@ -81,6 +85,9 @@ export function ActualVsPredictionChart({
   const chartData = useMemo(
     () => aggregateForecastPoints(filteredSourceData),
     [filteredSourceData]
+  );
+  const hasPrediction = chartData.some(
+    (point) => typeof point.prediction === "number"
   );
   const stats = useMemo(() => getSalesStats(chartData), [chartData]);
   const insights = useMemo(
@@ -198,7 +205,7 @@ export function ActualVsPredictionChart({
         <ForecastMetric
           icon={Percent}
           label="Akurasi prediksi"
-          value={`${stats.accuracy}%`}
+          value={stats.accuracy === null ? "-" : `${stats.accuracy}%`}
           tone="blue"
         />
         <ForecastMetric
@@ -273,7 +280,7 @@ export function ActualVsPredictionChart({
                 }}
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="actual"
                 name="Aktual"
                 stroke={chartColors.actual}
@@ -283,18 +290,20 @@ export function ActualVsPredictionChart({
                 isAnimationActive
                 animationDuration={900}
               />
-              <Line
-                type="monotone"
-                dataKey="prediction"
-                name="Prediksi"
-                stroke={chartColors.prediction}
-                strokeWidth={3}
-                strokeDasharray="7 7"
-                dot={{ r: 3, strokeWidth: 2, fill: "#020617" }}
-                activeDot={{ r: 6, strokeWidth: 0, fill: "#a78bfa" }}
-                isAnimationActive
-                animationDuration={900}
-              />
+              {hasPrediction ? (
+                <Line
+                  type="linear"
+                  dataKey="prediction"
+                  name="Prediksi"
+                  stroke={chartColors.prediction}
+                  strokeWidth={3}
+                  strokeDasharray="7 7"
+                  dot={{ r: 3, strokeWidth: 2, fill: "#020617" }}
+                  activeDot={{ r: 6, strokeWidth: 0, fill: "#a78bfa" }}
+                  isAnimationActive
+                  animationDuration={900}
+                />
+              ) : null}
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -354,9 +363,8 @@ function ChartTooltip({
   }
 
   const period = payload[0]?.payload as AggregatedForecastPoint | undefined;
-  const actual = Number(period?.actual ?? 0);
-  const prediction = Number(period?.prediction ?? 0);
-  const error = actual - prediction;
+  const prediction = period?.prediction ?? null;
+  const error = period?.error ?? null;
 
   return (
     <div className="rounded-2xl border border-white/10 bg-slate-950/95 p-3 text-sm shadow-2xl shadow-black/30">
@@ -375,24 +383,26 @@ function ChartTooltip({
               <span className="text-slate-400">{entry.name}</span>
             </div>
             <span className="font-semibold text-white">
-              {formatCompactNumber(Number(entry.value))}
+              {formatTooltipValue(entry.value)}
             </span>
           </div>
         ))}
 
-        <div className="flex min-w-44 items-center justify-between gap-6 border-t border-white/10 pt-2">
-          <div className="flex items-center gap-2">
-            <span
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: chartColors.error }}
-            />
-            <span className="text-slate-400">Selisih error</span>
+        {typeof prediction === "number" && typeof error === "number" ? (
+          <div className="flex min-w-44 items-center justify-between gap-6 border-t border-white/10 pt-2">
+            <div className="flex items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: chartColors.error }}
+              />
+              <span className="text-slate-400">Selisih error</span>
+            </div>
+            <span className="font-semibold text-white">
+              {error >= 0 ? "+" : ""}
+              {formatCompactNumber(error)}
+            </span>
           </div>
-          <span className="font-semibold text-white">
-            {error >= 0 ? "+" : ""}
-            {formatCompactNumber(error)}
-          </span>
-        </div>
+        ) : null}
       </div>
     </div>
   );
@@ -456,9 +466,20 @@ function aggregateForecastPoints(data: SalesForecastPoint[]) {
     const existing = grouped.get(point.date);
 
     if (existing) {
-      existing.actual += point.actual;
-      existing.prediction += point.prediction;
-      existing.error = existing.actual - existing.prediction;
+      existing.actual =
+        existing.actual === null && point.actual === null
+          ? null
+          : (existing.actual ?? 0) + (point.actual ?? 0);
+      existing.prediction =
+        typeof existing.prediction === "number" &&
+        typeof point.prediction === "number"
+          ? existing.prediction + point.prediction
+          : existing.prediction ?? point.prediction;
+      existing.error =
+        typeof existing.actual === "number" &&
+        typeof existing.prediction === "number"
+          ? existing.actual - existing.prediction
+          : null;
       return;
     }
 
@@ -466,10 +487,10 @@ function aggregateForecastPoints(data: SalesForecastPoint[]) {
       date: point.date,
       label: point.label,
       period: point.period,
-      actual: point.actual,
-      prediction: point.prediction,
-      error: point.error,
-    });
+          actual: point.actual,
+          prediction: point.prediction,
+          error: point.error,
+        });
   });
 
   return Array.from(grouped.values()).sort((first, second) =>
@@ -478,30 +499,47 @@ function aggregateForecastPoints(data: SalesForecastPoint[]) {
 }
 
 function getSalesStats(data: AggregatedForecastPoint[]) {
-  const totalActual = data.reduce((total, item) => total + item.actual, 0);
+  const totalActual = data.reduce((total, item) => total + (item.actual ?? 0), 0);
   const totalPrediction = data.reduce(
-    (total, item) => total + item.prediction,
+    (total, item) => total + (item.prediction ?? 0),
     0
   );
   const averageError =
-    data.reduce((total, item) => total + Math.abs(item.error), 0) /
-    Math.max(data.length, 1);
+    data.reduce((total, item) => total + Math.abs(item.error ?? 0), 0) /
+    Math.max(
+      data.filter((item) => typeof item.error === "number").length,
+      1
+    );
 
   const errorRates = data
-    .filter((item) => item.actual > 0)
-    .map((item) => Math.abs(item.error) / item.actual);
+    .filter(
+      (item) =>
+        typeof item.actual === "number" &&
+        item.actual > 0 &&
+        typeof item.error === "number"
+    )
+    .map((item) => {
+      const actual = item.actual ?? 1;
+
+      return Math.abs(item.error ?? 0) / actual;
+    });
 
   const averageErrorRate =
-    errorRates.reduce((total, value) => total + value, 0) /
-    Math.max(errorRates.length, 1);
+    errorRates.length > 0
+      ? errorRates.reduce((total, value) => total + value, 0) /
+        errorRates.length
+      : null;
 
-  const accuracy = Math.max(0, Math.min(100, 100 - averageErrorRate * 100));
+  const accuracy =
+    averageErrorRate === null
+      ? null
+      : Math.max(0, Math.min(100, 100 - averageErrorRate * 100));
 
   return {
     totalActual,
     totalPrediction,
     averageError: Math.round(averageError),
-    accuracy: Number(accuracy.toFixed(1)),
+    accuracy: accuracy === null ? null : Number(accuracy.toFixed(1)),
   };
 }
 
@@ -527,7 +565,9 @@ function getForecastInsights({
   const last = chartData[chartData.length - 1];
   const previous = chartData[Math.max(chartData.length - 2, 0)];
   const predictionChange =
-    previous.prediction > 0
+    typeof previous.prediction === "number" &&
+    previous.prediction > 0 &&
+    typeof last.prediction === "number"
       ? ((last.prediction - previous.prediction) / previous.prediction) * 100
       : 0;
   const direction = predictionChange >= 0 ? "meningkat" : "menurun";
@@ -541,9 +581,11 @@ function getForecastInsights({
     trendingProduct
       ? `${trendingProduct.productName} memiliki tren kenaikan tertinggi di kategori ${trendingProduct.category}.`
       : "Belum ada produk dengan tren kenaikan yang cukup kuat.",
-    `Akurasi prediksi mencapai ${stats.accuracy}% dengan rata-rata error ${formatCompactNumber(
-      stats.averageError
-    )} unit.`,
+    stats.accuracy === null
+      ? "Akurasi prediksi akan muncul setelah ada periode aktual pembanding."
+      : `Akurasi prediksi mencapai ${stats.accuracy}% dengan rata-rata error ${formatCompactNumber(
+          stats.averageError
+        )} unit.`,
   ];
 }
 
@@ -589,9 +631,11 @@ function getTopTrendingProduct(sourceData: SalesForecastPoint[]) {
       );
       const first = sortedPoints[0];
       const last = sortedPoints[sortedPoints.length - 1];
+      const firstActual = first.actual ?? 0;
+      const lastActual = last.actual ?? 0;
       const growth =
-        first.actual > 0
-          ? ((last.actual - first.actual) / first.actual) * 100
+        firstActual > 0
+          ? ((lastActual - firstActual) / firstActual) * 100
           : 0;
 
       return {
@@ -608,4 +652,12 @@ function formatCompactNumber(value: number) {
     notation: Math.abs(value) >= 1000 ? "compact" : "standard",
     maximumFractionDigits: Math.abs(value) >= 1000 ? 1 : 0,
   }).format(value);
+}
+
+function formatTooltipValue(value: unknown) {
+  if (typeof value !== "number") {
+    return "-";
+  }
+
+  return formatCompactNumber(value);
 }

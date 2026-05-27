@@ -26,7 +26,10 @@ import {
   getCategoryStockChartData,
   getInventoryValueChartData,
 } from "@/lib/helpers/chart-data";
-import { actualVsPredictionData } from "@/data/dashboard-insights";
+import {
+  getActualVsPredictionChartData,
+  getLatestPredictionTotal,
+} from "@/lib/helpers/forecast-chart-data";
 
 export default async function DashboardPage() {
   const products = await getProducts();
@@ -35,6 +38,7 @@ export default async function DashboardPage() {
   const metrics = getDashboardMetrics(products);
   const categoryStockData = getCategoryStockChartData(products);
   const inventoryValueData = getInventoryValueChartData(products);
+  const forecastChartData = getActualVsPredictionChartData(products, sales);
   const stockNotifications = getAutomaticStockNotifications(products, sales);
   const almostEmptyProducts = products.filter((product) => {
     return Number(product.stock) > 0 && Number(product.stock) <= 5;
@@ -42,10 +46,7 @@ export default async function DashboardPage() {
   const emptyProducts = products.filter((product) => {
     return Number(product.stock) <= 0;
   });
-  const weeklyPrediction = actualVsPredictionData.weekly.reduce(
-    (total, item) => total + item.prediction,
-    0
-  );
+  const weeklyPrediction = getLatestPredictionTotal(forecastChartData.weekly);
 
   return (
     <DashboardLayout>
@@ -78,16 +79,16 @@ export default async function DashboardPage() {
           />
 
           <StatCard
-            title="Prediksi Minggu Ini"
+            title="Prediksi Periode Depan"
             value={formatCompactNumber(weeklyPrediction)}
-            description="Estimasi unit terjual dari model"
+            description="Estimasi unit terjual berikutnya"
             icon={TrendingUp}
             tone="emerald"
           />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
-          <ActualVsPredictionChart />
+          <ActualVsPredictionChart data={forecastChartData} />
           <StockNotifications notifications={stockNotifications} />
         </section>
 
