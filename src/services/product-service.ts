@@ -8,7 +8,7 @@ async function requireCurrentStoreId() {
   const currentStore = await getCurrentStore();
 
   if (!currentStore?.store?.id) {
-    throw new Error("Store tidak ditemukan. Silakan login ulang.");
+    return null;
   }
 
   return currentStore.store.id;
@@ -17,6 +17,10 @@ async function requireCurrentStoreId() {
 export async function getProducts(): Promise<Product[]> {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    return [];
+  }
 
   const { data, error } = await supabase
     .from("products")
@@ -35,6 +39,10 @@ export async function getProductById(id: string): Promise<Product | null> {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
 
+  if (!storeId) {
+    return null;
+  }
+
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -52,6 +60,10 @@ export async function getProductById(id: string): Promise<Product | null> {
 export async function createProduct(values: ProductFormValues) {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    throw new Error("Silakan login ulang.");
+  }
 
   const { error } = await supabase.from("products").insert({
     store_id: storeId,
@@ -79,9 +91,16 @@ export async function createProduct(values: ProductFormValues) {
   revalidatePath("/prediksi-ai");
 }
 
-export async function updateProduct(id: string, values: ProductFormValues) {
+export async function updateProduct(
+  id: string,
+  values: ProductFormValues
+) {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    throw new Error("Silakan login ulang.");
+  }
 
   const { error } = await supabase
     .from("products")
@@ -118,6 +137,10 @@ export async function updateProduct(id: string, values: ProductFormValues) {
 export async function deleteProduct(id: string) {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    throw new Error("Silakan login ulang.");
+  }
 
   const { error } = await supabase
     .from("products")

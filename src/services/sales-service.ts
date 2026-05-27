@@ -7,7 +7,7 @@ async function requireCurrentStoreId() {
   const currentStore = await getCurrentStore();
 
   if (!currentStore?.store?.id) {
-    throw new Error("Store tidak ditemukan. Silakan login ulang.");
+    return null;
   }
 
   return currentStore.store.id;
@@ -16,6 +16,10 @@ async function requireCurrentStoreId() {
 export async function getSales(): Promise<SaleWithItems[]> {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    return [];
+  }
 
   const { data, error } = await supabase
     .from("sales")
@@ -61,11 +65,15 @@ export async function createSale(input: {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
 
+  if (!storeId) {
+    throw new Error("Silakan login ulang.");
+  }
+
   const totalAmount = input.items.reduce((total, item) => {
     return total + item.quantity * item.unit_price;
   }, 0);
 
-  const invoiceNumber = `INV-${Date.now()}`;
+  const invoiceNumber = `INV-${new Date().getTime()}`;
 
   const { data: sale, error: saleError } = await supabase
     .from("sales")
@@ -117,6 +125,10 @@ export async function createSale(input: {
 export async function deleteSale(saleId: string) {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    throw new Error("Silakan login ulang.");
+  }
 
   const { data: sale, error: saleError } = await supabase
     .from("sales")
