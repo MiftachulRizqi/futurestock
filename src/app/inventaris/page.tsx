@@ -15,11 +15,11 @@ export default async function InventarisPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
             Inventory Control
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-white">Inventaris</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 className="mt-2 text-3xl font-bold text-foreground">Inventaris</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Pantau stok, status produk, dan kesehatan inventaris toko.
           </p>
         </div>

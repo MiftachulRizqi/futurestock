@@ -12,16 +12,16 @@ export function OverstockPromoAlert({ promoBundles }: OverstockPromoAlertProps) 
   }
 
   return (
-    <GlassPanel className="border-amber-400/30 bg-linear-to-br from-amber-950/20 to-orange-950/20 p-6">
+    <GlassPanel className="border-primary/30 bg-linear-to-br from-primary/20 to-primary/20 p-6">
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/20">
-          <Gift className="h-5 w-5 text-amber-300" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+          <Gift className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white">
+          <h2 className="text-lg font-bold text-foreground">
             Rekomendasi Promo Pintar
           </h2>
-          <p className="text-sm text-amber-200">
+          <p className="text-sm text-muted-foreground">
             Saran AI untuk menghabiskan stok berlebih
           </p>
         </div>
@@ -77,14 +77,14 @@ function PromoBundleCard({ bundle }: { bundle: PromoBundle }) {
   };
 
   return (
-    <div className="rounded-2xl border border-amber-400/20 bg-slate-950/50 p-4">
+    <div className="rounded-2xl border border-primary/20 bg-card/50 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/20 text-amber-300">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20 text-primary">
               {getPromoIcon()}
             </div>
-            <span className="text-sm font-semibold text-amber-300">
+            <span className="text-sm font-semibold text-primary">
               {getPromoTypeLabel()}
             </span>
             <span
@@ -98,29 +98,29 @@ function PromoBundleCard({ bundle }: { bundle: PromoBundle }) {
             </span>
           </div>
 
-          <p className="text-sm font-medium text-white mb-2">
+          <p className="text-sm font-medium text-foreground mb-2">
             {bundle.primary_product_name}
             {bundle.secondary_product_name && (
-              <span className="text-slate-400"> + {bundle.secondary_product_name}</span>
+              <span className="text-muted-foreground"> + {bundle.secondary_product_name}</span>
             )}
           </p>
 
-          <p className="text-sm leading-relaxed text-slate-300">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {bundle.promo_description}
           </p>
 
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             {bundle.suggested_price && (
-              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-400">
+              <span className="rounded-full border border-border bg-card/5 px-2 py-1 text-muted-foreground">
                 Harga Promo: Rp{bundle.suggested_price.toLocaleString()}
               </span>
             )}
             {bundle.discount_percentage && (
-              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-400">
+              <span className="rounded-full border border-border bg-card/5 px-2 py-1 text-muted-foreground">
                 Diskon: {bundle.discount_percentage}%
               </span>
             )}
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-slate-400">
+            <span className="rounded-full border border-border bg-card/5 px-2 py-1 text-muted-foreground">
               Estimasi Clearance: {bundle.estimated_clearance_days} hari
             </span>
           </div>

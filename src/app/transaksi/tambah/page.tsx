@@ -14,26 +14,26 @@ export default async function TambahTransaksiPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
             Sales Transaction
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold text-white">
+          <h1 className="mt-2 text-3xl font-bold text-foreground">
             Tambah Transaksi
           </h1>
 
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Input penjualan real agar stok otomatis berkurang dan AI dapat
             membaca pola demand.
           </p>
         </div>
 
         {activeProducts.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 text-center">
-            <p className="font-medium text-white">
+          <div className="rounded-3xl border border-border bg-card/[0.06] p-6 text-center">
+            <p className="font-medium text-foreground">
               Tidak ada produk aktif dengan stok tersedia.
             </p>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               Tambahkan produk atau perbarui stok terlebih dahulu.
             </p>
           </div>

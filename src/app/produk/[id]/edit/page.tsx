@@ -28,8 +28,8 @@ export default async function EditProdukPage({ params }: EditProdukPageProps) {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Edit Produk</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-3xl font-bold text-foreground">Edit Produk</h1>
+          <p className="text-sm text-muted-foreground">
             Perbarui informasi produk dan foto produk.
           </p>
         </div>

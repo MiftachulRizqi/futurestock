@@ -18,19 +18,19 @@ export function AppSidebar() {
         duration: 0.45,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="hidden h-screen w-72 shrink-0 border-r border-white/10 bg-slate-950/80 p-5 backdrop-blur-xl lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:flex-col"
+      className="hidden h-screen w-72 shrink-0 border-r border-border bg-background/80 p-5 backdrop-blur-xl lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:flex-col"
     >
       <Link href="/dashboard" className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-500 shadow-lg shadow-cyan-500/20">
-          <ShoppingBasket className="h-6 w-6 text-white" />
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary shadow-lg shadow-primary/20">
+          <ShoppingBasket className="h-6 w-6 text-primary-foreground" />
         </div>
 
         <div>
-          <p className="text-lg font-bold tracking-tight text-white">
+          <p className="text-lg font-bold tracking-tight text-foreground">
             FutureStock
           </p>
 
-          <p className="text-xs text-cyan-300">AI Inventory SaaS</p>
+          <p className="text-xs text-primary">AI Inventory SaaS</p>
         </div>
       </Link>
 
@@ -49,16 +49,16 @@ export function AppSidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-cyan-400/10 text-cyan-200 shadow-[0_0_30px_rgba(34,211,238,0.12)]"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  ? "bg-primary/10 text-primary shadow-[0_0_30px_rgba(53,138,155,0.12)]"
+                  : "text-muted-foreground hover:bg-card/5 hover:text-foreground"
               )}
             >
               <Icon
                 className={cn(
                   "h-5 w-5 transition",
                   active
-                    ? "text-cyan-300"
-                    : "text-slate-500 group-hover:text-white"
+                    ? "text-primary"
+                    : "text-muted-foreground group-hover:text-foreground"
                 )}
               />
 
@@ -68,14 +68,14 @@ export function AppSidebar() {
         })}
       </nav>
 
-      <div className="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-4">
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-400/20">
-          <Sparkles className="h-5 w-5 text-cyan-300" />
+      <div className="rounded-3xl border border-primary/20 bg-primary/10 p-4">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/20">
+          <Sparkles className="h-5 w-5 text-primary" />
         </div>
 
-        <p className="text-sm font-semibold text-white">AI Forecast Ready</p>
+        <p className="text-sm font-semibold text-foreground">AI Forecast Ready</p>
 
-        <p className="mt-1 text-xs leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
           Optimalkan stok toko dengan prediksi permintaan berbasis AI.
         </p>
       </div>

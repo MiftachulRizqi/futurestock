@@ -17,10 +17,10 @@ export default async function ProdukPage() {
 
         <div className="flex justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-foreground">
               Produk
             </h1>
-            <p className="text-slate-400">
+            <p className="text-muted-foreground">
               Kelola semua produk
             </p>
           </div>

@@ -41,12 +41,12 @@ export function ProductTable({
 
   if (products.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-8 text-center">
-        <h2 className="text-lg font-semibold text-white">
+      <div className="rounded-2xl border border-border bg-card/70 p-8 text-center">
+        <h2 className="text-lg font-semibold text-foreground">
           Belum ada produk
         </h2>
 
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Tambahkan produk pertama untuk mulai mengelola inventaris.
         </p>
 
@@ -69,13 +69,13 @@ export function ProductTable({
           placeholder="Cari produk..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-2 text-white outline-none placeholder:text-slate-500 focus:border-cyan-500"
+          className="w-full rounded-xl border border-border bg-card px-4 py-2 text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
         />
 
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="rounded-xl border border-white/10 bg-slate-900 px-4 py-2 text-white outline-none focus:border-cyan-500"
+          className="rounded-xl border border-border bg-card px-4 py-2 text-foreground outline-none focus:border-primary"
         >
           <option value="all">Semua Kategori</option>
 
@@ -88,9 +88,9 @@ export function ProductTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-slate-950/70">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card/70">
         <table className="w-full min-w-[980px] text-sm">
-          <thead className="bg-white/5 text-slate-400">
+          <thead className="bg-card/5 text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left">
                 Produk
@@ -126,11 +126,11 @@ export function ProductTable({
             {filteredProducts.map((product) => (
               <tr
                 key={product.id}
-                className="border-t border-white/10 transition hover:bg-white/[0.03]"
+                className="border-t border-border transition hover:bg-card/[0.03]"
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border bg-card/5">
                       {product.image_url ? (
                         <Image
                           src={product.image_url.trim()}
@@ -141,18 +141,18 @@ export function ProductTable({
                           className="h-12 w-12 object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-500">
+                        <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">
                           IMG
                         </div>
                       )}
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-white">
+                      <p className="truncate font-medium text-foreground">
                         {product.name}
                       </p>
 
-                      <p className="truncate text-xs text-slate-500">
+                      <p className="truncate text-xs text-muted-foreground">
                         {product.supplier ||
                           "Tanpa supplier"}
                       </p>
@@ -160,24 +160,24 @@ export function ProductTable({
                   </div>
                 </td>
 
-                <td className="px-4 py-3 text-slate-400">
+                <td className="px-4 py-3 text-muted-foreground">
                   {product.sku}
                 </td>
 
-                <td className="px-4 py-3 text-slate-400">
+                <td className="px-4 py-3 text-muted-foreground">
                   {product.category}
                 </td>
 
-                <td className="px-4 py-3 text-slate-400">
+                <td className="px-4 py-3 text-muted-foreground">
                   {product.stock} {product.unit}
                 </td>
 
-                <td className="px-4 py-3 text-slate-400">
+                <td className="px-4 py-3 text-muted-foreground">
                   {formatCurrency(Number(product.price))}
                 </td>
 
                 <td className="px-4 py-3">
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-300">
+                  <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
                     {product.status === "active"
                       ? "Aktif"
                       : "Nonaktif"}

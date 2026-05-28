@@ -26,11 +26,11 @@ export default async function PengaturanPage() {
     >
       <div className="space-y-6">
         <GlassPanel className="p-6">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
             Workspace Settings
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-white">Pengaturan</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 className="mt-2 text-3xl font-bold text-foreground">Pengaturan</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Lihat akun yang sedang login, toko aktif, dan role user.
           </p>
         </GlassPanel>
@@ -38,13 +38,13 @@ export default async function PengaturanPage() {
         <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
           <GlassPanel className="p-5">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-cyan-400/10 text-cyan-300">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
                 <User className="h-8 w-8" />
               </div>
 
               <div>
-                <p className="text-lg font-semibold text-white">{userName}</p>
-                <p className="text-sm text-slate-400">{email}</p>
+                <p className="text-lg font-semibold text-foreground">{userName}</p>
+                <p className="text-sm text-muted-foreground">{email}</p>
               </div>
             </div>
 
@@ -57,7 +57,7 @@ export default async function PengaturanPage() {
             <form action={logoutAction} className="mt-6">
               <button
                 type="submit"
-                className="h-11 w-full rounded-xl border border-rose-400/20 bg-rose-400/10 font-semibold text-rose-300 transition hover:bg-rose-400/20"
+                className="h-11 w-full rounded-xl border border-destructive/20 bg-destructive/10 font-semibold text-destructive transition hover:bg-destructive/20"
               >
                 Logout
               </button>
@@ -66,15 +66,15 @@ export default async function PengaturanPage() {
 
           <GlassPanel className="p-5">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-cyan-400/10 text-cyan-300">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
                 <Building2 className="h-8 w-8" />
               </div>
 
               <div>
-                <p className="text-lg font-semibold text-white">
+                <p className="text-lg font-semibold text-foreground">
                   {store?.name ?? "FutureStock Store"}
                 </p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   {store?.business_type ?? "UMKM Retail"} ·{" "}
                   {store?.country ?? "Indonesia"}
                 </p>
@@ -119,10 +119,10 @@ function InfoItem({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-white/10 bg-slate-950/50 p-4 ${className}`}
+      className={`rounded-2xl border border-border bg-card/50 p-4 ${className}`}
     >
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-2 break-all text-sm font-medium text-white">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-2 break-all text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }
@@ -137,9 +137,9 @@ function SettingsCard({
   return (
     <button
       type="button"
-      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-left text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
+      className="flex items-center gap-3 rounded-2xl border border-border bg-card/[0.06] p-4 text-left text-sm text-muted-foreground transition hover:bg-card/10 hover:text-foreground"
     >
-      <Icon className="h-5 w-5 text-cyan-300" />
+      <Icon className="h-5 w-5 text-primary" />
       {title}
     </button>
   );

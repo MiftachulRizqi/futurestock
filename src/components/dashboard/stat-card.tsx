@@ -12,10 +12,10 @@ type StatCardProps = {
 };
 
 const toneMap = {
-  cyan: "from-cyan-400/20 to-blue-500/10 text-cyan-300",
-  violet: "from-violet-400/20 to-fuchsia-500/10 text-violet-300",
-  emerald: "from-emerald-400/20 to-cyan-500/10 text-emerald-300",
-  amber: "from-amber-400/20 to-orange-500/10 text-amber-300",
+  cyan: "from-primary/20 to-primary/10 text-primary",
+  violet: "from-primary/20 to-primary/10 text-primary",
+  emerald: "from-primary/20 to-primary/10 text-primary",
+  amber: "from-primary/20 to-primary/10 text-primary",
 };
 
 export function StatCard({
@@ -28,14 +28,14 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <AnimatedContainer delay={delay}>
-      <GlassPanel className="group p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:shadow-cyan-500/20">
+      <GlassPanel className="group p-5 transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-primary/20">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-slate-400">{title}</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-white">
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="mt-3 text-3xl font-bold tracking-tight text-foreground">
               {value}
             </p>
-            <p className="mt-2 text-xs text-slate-500">{description}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{description}</p>
           </div>
 
           <div

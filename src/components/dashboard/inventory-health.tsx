@@ -12,41 +12,41 @@ export function InventoryHealth({
   inactiveCount,
 }: InventoryHealthProps) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
+    <div className="rounded-3xl border border-border bg-card/[0.06] p-5 shadow-2xl shadow-primary/20 backdrop-blur">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-emerald-300">
+        <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
           Inventory Health
         </p>
-        <h2 className="mt-2 text-xl font-bold text-white">
+        <h2 className="mt-2 text-xl font-bold text-foreground">
           Kesehatan Inventaris
         </h2>
       </div>
 
       <div className="mt-6">
         <div className="flex items-end justify-between">
-          <p className="text-5xl font-bold text-white">{value}%</p>
-          <p className="text-sm text-slate-400">{totalProducts} produk</p>
+          <p className="text-5xl font-bold text-foreground">{value}%</p>
+          <p className="text-sm text-muted-foreground">{totalProducts} produk</p>
         </div>
 
-        <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/10">
+        <div className="mt-5 h-3 overflow-hidden rounded-full bg-border">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500"
+            className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-primary"
             style={{ width: `${value}%` }}
           />
         </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
-          <p className="text-2xl font-bold text-amber-300">
+        <div className="rounded-2xl border border-border bg-card/50 p-4">
+          <p className="text-2xl font-bold text-primary">
             {lowStockCount}
           </p>
-          <p className="mt-1 text-xs text-slate-400">Stok menipis</p>
+          <p className="mt-1 text-xs text-muted-foreground">Stok menipis</p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
-          <p className="text-2xl font-bold text-rose-300">{inactiveCount}</p>
-          <p className="mt-1 text-xs text-slate-400">Produk nonaktif</p>
+        <div className="rounded-2xl border border-border bg-card/50 p-4">
+          <p className="text-2xl font-bold text-primary">{inactiveCount}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Produk nonaktif</p>
         </div>
       </div>
     </div>

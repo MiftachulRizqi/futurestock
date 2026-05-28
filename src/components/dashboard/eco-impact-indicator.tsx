@@ -17,42 +17,42 @@ export function EcoImpactIndicator({
       : "0";
 
   return (
-    <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
-        <Leaf className="h-5 w-5 text-green-600" />
-        <h2 className="text-lg font-semibold text-gray-900">
+        <Leaf className="h-5 w-5 text-primary" />
+        <h2 className="text-lg font-semibold text-foreground">
           Eco Impact Indicator
         </h2>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between rounded-xl bg-red-50 p-4">
+        <div className="flex items-center justify-between rounded-xl bg-destructive/10 p-4">
           <div className="flex items-center gap-2">
-            <TrendingDown className="h-4 w-4 text-red-500" />
-            <span className="text-sm text-gray-700">
+            <TrendingDown className="h-4 w-4 text-destructive" />
+            <span className="text-sm text-foreground">
               Potensi Pengurangan Dead Stock
             </span>
           </div>
 
-          <span className="font-bold text-red-600">
+          <span className="font-bold text-destructive">
             {safeProducts} Produk
           </span>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl bg-green-50 p-4">
+        <div className="flex items-center justify-between rounded-xl bg-primary/10 p-4">
           <div className="flex items-center gap-2">
-            <PackageCheck className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-gray-700">
+            <PackageCheck className="h-4 w-4 text-primary" />
+            <span className="text-sm text-foreground">
               Efisiensi Stok
             </span>
           </div>
 
-          <span className="font-bold text-green-700">
+          <span className="font-bold text-primary">
             {efficiency}%
           </span>
         </div>
 
-        <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">
+        <div className="rounded-xl bg-primary/10 p-4 text-sm text-foreground">
           Sistem membantu mengurangi penumpukan stok dan meningkatkan
           efisiensi inventaris secara berkelanjutan.
         </div>

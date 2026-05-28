@@ -28,8 +28,8 @@ export default async function ProductDetailPage({
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <h1 className="text-3xl font-bold text-white">{product.name}</h1>
-            <p className="text-sm text-slate-400">
+            <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+            <p className="text-sm text-muted-foreground">
               Detail informasi produk FutureStock.
             </p>
           </div>
@@ -43,8 +43,8 @@ export default async function ProductDetailPage({
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-          <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-5">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+          <div className="rounded-2xl border border-border bg-card/70 p-5">
+            <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-card/5">
               {product.image_url ? (
                 <Image
                   src={product.image_url.trim()}
@@ -55,7 +55,7 @@ export default async function ProductDetailPage({
                   className="aspect-square w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                   Belum ada foto
                 </div>
               )}
@@ -92,9 +92,9 @@ export default async function ProductDetailPage({
 
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-5">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-2 font-medium text-white">{value}</p>
+    <div className="rounded-2xl border border-border bg-card/70 p-5">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-2 font-medium text-foreground">{value}</p>
     </div>
   );
 }

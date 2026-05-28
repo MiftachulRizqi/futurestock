@@ -25,22 +25,22 @@ export default async function PrediksiAiPage() {
         <GlassPanel className="p-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
                 Gemini AI Forecast Engine
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-white">
+              <h1 className="mt-2 text-3xl font-bold text-foreground">
                 Prediksi AI
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                 Forecasting stok berbasis Gemini untuk menganalisis pola
                 penjualan, memprediksi potensi demand, memberi rekomendasi stok
                 ideal, warning overstock, dan risiko dead stock.
               </p>
             </div>
 
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-cyan-400/10 text-cyan-300">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 text-primary">
               <Bot className="h-10 w-10" />
             </div>
           </div>
@@ -48,12 +48,12 @@ export default async function PrediksiAiPage() {
 
         <GlassPanel className="p-5">
           <div className="flex items-start gap-3">
-            <BrainCircuit className="mt-1 h-5 w-5 shrink-0 text-cyan-300" />
+            <BrainCircuit className="mt-1 h-5 w-5 shrink-0 text-primary" />
 
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-white">Ringkasan AI</h2>
+              <h2 className="text-xl font-bold text-foreground">Ringkasan AI</h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-400">
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {forecast.summary}
               </p>
             </div>
@@ -106,31 +106,31 @@ function ForecastSection({
   return (
     <GlassPanel className="p-5">
       <div>
-        <h2 className="text-xl font-bold text-white">{title}</h2>
-        <p className="mt-1 text-sm text-slate-400">{description}</p>
+        <h2 className="text-xl font-bold text-foreground">{title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </div>
 
       <div className="mt-5 space-y-3">
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-5 text-sm text-slate-400">
+          <div className="rounded-2xl border border-border bg-card/50 p-5 text-sm text-muted-foreground">
             Tidak ada data untuk kategori ini.
           </div>
         ) : (
           items.map((item) => (
             <div
               key={`${title}-${item.product_id}`}
-              className="rounded-2xl border border-white/10 bg-slate-950/50 p-4"
+              className="rounded-2xl border border-border bg-card/50 p-4"
             >
               <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
                 <div>
-                  <p className="font-semibold text-white">{item.name}</p>
+                  <p className="font-semibold text-foreground">{item.name}</p>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {item.category} · {item.sku}
                   </p>
                 </div>
 
-                <span className="w-fit rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-300">
+                <span className="w-fit rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
                   {item.confidence_score}% confidence
                 </span>
               </div>
@@ -170,26 +170,26 @@ function ForecastSection({
               </div>
 
               {item.holiday_affected ? (
-                <div className="mt-4 rounded-xl border border-violet-400/30 bg-violet-400/10 p-3 text-sm">
+                <div className="mt-4 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm">
                   <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-violet-300" />
-                    <span className="font-semibold text-violet-200">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <span className="font-semibold text-primary">
                       Terdampak {item.holiday_name}
                     </span>
                   </div>
-                  <p className="text-violet-300">
+                  <p className="text-primary">
                     Demand ditingkatkan {item.holiday_multiplier}x karena hari besar
                   </p>
                 </div>
               ) : (
-                <div className="mt-4 rounded-xl border border-slate-700/50 bg-slate-800/30 p-3 text-sm">
+                <div className="mt-4 rounded-xl border border-border bg-card/30 p-3 text-sm">
                   <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-slate-400" />
-                    <span className="font-semibold text-slate-300">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-semibold text-muted-foreground">
                       Tidak ada hari besar terdekat
                     </span>
                   </div>
-                  <p className="text-slate-400">
+                  <p className="text-muted-foreground">
                     Prediksi demand berjalan normal berdasarkan histori tren penjualan.
                   </p>
                 </div>
@@ -204,7 +204,7 @@ function ForecastSection({
 
               {/* SABUK PENGAMAN: Jika AI malah kirim object, kita ekstrak stringnya */}
               {item.promo_recommendation ? (
-                <div className="mt-4 rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-3 text-sm text-cyan-200">
+                <div className="mt-4 rounded-xl border border-primary/20 bg-primary/10 p-3 text-sm text-primary">
                   <span className="font-medium">💡 Saran Promo:</span>{" "}
                   {typeof item.promo_recommendation === "string" 
                     ? item.promo_recommendation 
@@ -212,7 +212,7 @@ function ForecastSection({
                 </div>
               ) : null}
 
-              <p className="mt-4 text-sm leading-6 text-slate-400">
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
                 {typeof item.reason === "string" ? item.reason : "Analisis AI."}
               </p>
             </div>
@@ -231,9 +231,9 @@ function MiniMetric({
   value: string | number;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 font-semibold text-white">{value}</p>
+    <div className="rounded-xl border border-border bg-card/[0.03] p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 font-semibold text-foreground">{value}</p>
     </div>
   );
 }

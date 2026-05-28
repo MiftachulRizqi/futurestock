@@ -111,28 +111,28 @@ export function ActualVsPredictionChart({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur-xl",
+        "rounded-3xl border border-border bg-card/[0.06] p-5 shadow-2xl shadow-primary/20 backdrop-blur-xl",
         className
       )}
     >
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary">
               <BarChart3 className="h-5 w-5" />
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-[0.25em] text-emerald-300">
+              <p className="text-xs font-medium uppercase tracking-[0.25em] text-primary">
                 AI/ML Forecast
               </p>
-              <h2 className="mt-1 text-xl font-bold text-white">
+              <h2 className="mt-1 text-xl font-bold text-foreground">
                 Grafik Aktual vs Prediksi
               </h2>
             </div>
           </div>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             Pantau akurasi prediksi penjualan per kategori agar keputusan
             restock lebih cepat dan presisi.
           </p>
@@ -142,7 +142,7 @@ export function ActualVsPredictionChart({
           <div className="min-w-0">
             <label
               htmlFor="forecast-category"
-              className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"
+              className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground"
             >
               <Filter className="h-3.5 w-3.5" />
               Filter kategori
@@ -152,7 +152,7 @@ export function ActualVsPredictionChart({
               id="forecast-category"
               value={category}
               onChange={(event) => setCategory(event.target.value)}
-              className="h-10 w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 text-sm font-medium text-white outline-none transition focus:border-emerald-300/60 focus:ring-2 focus:ring-emerald-400/20"
+              className="h-10 w-full rounded-xl border border-border bg-card/70 px-3 text-sm font-medium text-foreground outline-none transition focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
             >
               {categoryOptions.map((option) => (
                 <option key={option} value={option}>
@@ -163,8 +163,8 @@ export function ActualVsPredictionChart({
           </div>
 
           <div>
-            <p className="mb-2 text-xs font-medium text-slate-400">Periode</p>
-            <div className="grid grid-cols-3 rounded-xl border border-white/10 bg-slate-950/70 p-1">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Periode</p>
+            <div className="grid grid-cols-3 rounded-xl border border-border bg-card/70 p-1">
               {rangeOptions.map((option) => {
                 const active = option === range;
 
@@ -176,8 +176,8 @@ export function ActualVsPredictionChart({
                     className={cn(
                       "h-9 rounded-lg px-3 text-xs font-semibold transition sm:text-sm",
                       active
-                        ? "bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                        : "text-muted-foreground hover:bg-card/5 hover:text-foreground"
                     )}
                   >
                     {salesRangeLabels[option]}
@@ -220,10 +220,10 @@ export function ActualVsPredictionChart({
         {insights.map((insight, index) => (
           <div
             key={insight}
-            className="rounded-xl border border-white/10 bg-slate-950/45 p-4"
+            className="rounded-xl border border-border bg-card/45 p-4"
           >
             <div className="flex gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-400/10 text-cyan-300">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 {index === 0 ? (
                   <TrendingUp className="h-4 w-4" />
                 ) : index === 1 ? (
@@ -232,7 +232,7 @@ export function ActualVsPredictionChart({
                   <Percent className="h-4 w-4" />
                 )}
               </div>
-              <p className="text-sm leading-6 text-slate-300">{insight}</p>
+              <p className="text-sm leading-6 text-muted-foreground">{insight}</p>
             </div>
           </div>
         ))}
@@ -249,32 +249,32 @@ export function ActualVsPredictionChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.08)"
+                stroke="var(--border)"
                 vertical={false}
               />
               <XAxis
                 dataKey="label"
                 axisLine={false}
                 tickLine={false}
-                stroke="#94a3b8"
+                stroke="var(--border)"
                 fontSize={12}
                 tickMargin={12}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                stroke="#94a3b8"
+                stroke="var(--border)"
                 fontSize={12}
                 tickFormatter={formatCompactNumber}
               />
               <Tooltip
                 content={ChartTooltip}
-                cursor={{ stroke: "#22c55e", strokeOpacity: 0.18 }}
+                cursor={{ stroke: "var(--primary)", strokeOpacity: 0.18 }}
               />
               <Legend
                 iconType="circle"
                 wrapperStyle={{
-                  color: "#cbd5e1",
+                  color: "var(--muted-foreground)",
                   fontSize: "12px",
                   paddingTop: "12px",
                 }}
@@ -283,10 +283,10 @@ export function ActualVsPredictionChart({
                 type="linear"
                 dataKey="actual"
                 name="Aktual"
-                stroke={chartColors.actual}
+                stroke="var(--primary)"
                 strokeWidth={3}
-                dot={{ r: 3, strokeWidth: 2, fill: "#020617" }}
-                activeDot={{ r: 6, strokeWidth: 0, fill: "#4ade80" }}
+                dot={{ r: 3, strokeWidth: 2, fill: "var(--card)" }}
+                activeDot={{ r: 6, strokeWidth: 0, fill: "var(--primary)" }}
                 isAnimationActive
                 animationDuration={900}
               />
@@ -295,11 +295,11 @@ export function ActualVsPredictionChart({
                   type="linear"
                   dataKey="prediction"
                   name="Prediksi"
-                  stroke={chartColors.prediction}
+                  stroke="var(--primary)"
                   strokeWidth={3}
                   strokeDasharray="7 7"
-                  dot={{ r: 3, strokeWidth: 2, fill: "#020617" }}
-                  activeDot={{ r: 6, strokeWidth: 0, fill: "#a78bfa" }}
+                  dot={{ r: 3, strokeWidth: 2, fill: "var(--card)" }}
+                  activeDot={{ r: 6, strokeWidth: 0, fill: "var(--primary)" }}
                   isAnimationActive
                   animationDuration={900}
                 />
@@ -324,18 +324,18 @@ function ForecastMetric({
   tone: "emerald" | "violet" | "blue" | "amber";
 }) {
   const toneClass = {
-    emerald: "bg-emerald-400/15 text-emerald-300",
-    violet: "bg-violet-400/15 text-violet-300",
-    blue: "bg-blue-400/15 text-blue-300",
-    amber: "bg-amber-400/15 text-amber-300",
+    emerald: "bg-primary/15 text-primary",
+    violet: "bg-primary/15 text-primary",
+    blue: "bg-primary/15 text-primary",
+    amber: "bg-primary/15 text-primary",
   }[tone];
 
   return (
-    <div className="rounded-xl border border-white/10 bg-slate-950/50 p-4">
+    <div className="rounded-xl border border-border bg-card/50 p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-slate-500">{label}</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-white">
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
             {value}
           </p>
         </div>
@@ -367,8 +367,8 @@ function ChartTooltip({
   const error = period?.error ?? null;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/95 p-3 text-sm shadow-2xl shadow-black/30">
-      <p className="font-semibold text-white">{period?.period ?? label}</p>
+    <div className="rounded-2xl border border-border bg-card/95 p-3 text-sm shadow-2xl shadow-black/30">
+      <p className="font-semibold text-foreground">{period?.period ?? label}</p>
       <div className="mt-3 space-y-2">
         {payload.map((entry) => (
           <div
@@ -380,24 +380,24 @@ function ChartTooltip({
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: entry.color }}
               />
-              <span className="text-slate-400">{entry.name}</span>
+              <span className="text-muted-foreground">{entry.name}</span>
             </div>
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-foreground">
               {formatTooltipValue(entry.value)}
             </span>
           </div>
         ))}
 
         {typeof prediction === "number" && typeof error === "number" ? (
-          <div className="flex min-w-44 items-center justify-between gap-6 border-t border-white/10 pt-2">
+          <div className="flex min-w-44 items-center justify-between gap-6 border-t border-border pt-2">
             <div className="flex items-center gap-2">
               <span
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: chartColors.error }}
               />
-              <span className="text-slate-400">Selisih error</span>
+              <span className="text-muted-foreground">Selisih error</span>
             </div>
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-foreground">
               {error >= 0 ? "+" : ""}
               {formatCompactNumber(error)}
             </span>
@@ -410,12 +410,12 @@ function ChartTooltip({
 
 function ForecastEmptyState() {
   return (
-    <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/30 p-6 text-center">
-      <TriangleAlert className="h-10 w-10 text-slate-600" />
-      <p className="mt-3 text-sm font-medium text-white">
+    <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/30 p-6 text-center">
+      <TriangleAlert className="h-10 w-10 text-muted-foreground" />
+      <p className="mt-3 text-sm font-medium text-foreground">
         Belum ada data grafik
       </p>
-      <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+      <p className="mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
         Data aktual dan prediksi akan muncul setelah tersedia dari sumber data.
       </p>
     </div>
@@ -430,18 +430,18 @@ function ActualVsPredictionChartSkeleton({
   return (
     <section
       className={cn(
-        "rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur",
+        "rounded-3xl border border-border bg-card/[0.06] p-5 shadow-2xl shadow-primary/20 backdrop-blur",
         className
       )}
     >
       <div className="flex animate-pulse flex-col gap-5">
-        <div className="h-12 w-64 rounded-2xl bg-white/10" />
+        <div className="h-12 w-64 rounded-2xl bg-card/10" />
         <div className="grid gap-3 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="h-24 rounded-xl bg-white/10" />
+            <div key={index} className="h-24 rounded-xl bg-card/10" />
           ))}
         </div>
-        <div className="h-[340px] rounded-2xl bg-white/10" />
+        <div className="h-[340px] rounded-2xl bg-card/10" />
       </div>
     </section>
   );

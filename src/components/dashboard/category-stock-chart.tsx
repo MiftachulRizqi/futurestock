@@ -19,19 +19,19 @@ type CategoryStockChartProps = {
 
 export function CategoryStockChart({ data }: CategoryStockChartProps) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur">
+    <div className="rounded-3xl border border-border bg-card/[0.06] p-5 shadow-2xl shadow-primary/20 backdrop-blur">
       <div className="mb-6">
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-violet-300">
+        <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
           Stock Distribution
         </p>
-        <h2 className="mt-2 text-xl font-bold text-white">
+        <h2 className="mt-2 text-xl font-bold text-foreground">
           Distribusi Stok
         </h2>
       </div>
 
       <div className="h-[280px]">
         {data.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-slate-500">
+          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
             Belum ada data stok.
           </div>
         ) : (
@@ -54,10 +54,10 @@ export function CategoryStockChart({ data }: CategoryStockChartProps) {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  background: "#020617",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
                   borderRadius: "16px",
-                  color: "#fff",
+                  color: "var(--foreground)",
                 }}
               />
             </PieChart>
@@ -76,9 +76,9 @@ export function CategoryStockChart({ data }: CategoryStockChartProps) {
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               />
-              <span className="text-slate-400">{item.category}</span>
+              <span className="text-muted-foreground">{item.category}</span>
             </div>
-            <span className="font-medium text-white">{item.stock}</span>
+            <span className="font-medium text-foreground">{item.stock}</span>
           </div>
         ))}
       </div>

@@ -48,15 +48,15 @@ export default async function AnalitikPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
             Real Sales Analytics
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold text-white">
+          <h1 className="mt-2 text-3xl font-bold text-foreground">
             Analitik Penjualan
           </h1>
 
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Dashboard analytics berbasis transaksi real
             dan data penjualan aktual.
           </p>

@@ -16,14 +16,14 @@ export function TopSellingProducts({
   return (
     <GlassPanel className="p-5">
       <div className="mb-5 flex items-center gap-3">
-        <Trophy className="h-5 w-5 text-amber-300" />
+        <Trophy className="h-5 w-5 text-primary" />
 
         <div>
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-foreground">
             Top Selling Products
           </h2>
 
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Produk dengan penjualan tertinggi.
           </p>
         </div>
@@ -31,32 +31,32 @@ export function TopSellingProducts({
 
       <div className="space-y-3">
         {products.length === 0 ? (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Belum ada data penjualan.
           </p>
         ) : (
           products.map((product, index) => (
             <div
               key={product.name}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/50 p-4"
+              className="flex items-center justify-between rounded-2xl border border-border bg-card/50 p-4"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400/10 text-sm font-bold text-amber-300">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-sm font-bold text-primary">
                   #{index + 1}
                 </div>
 
                 <div>
-                  <p className="font-medium text-white">
+                  <p className="font-medium text-foreground">
                     {product.name}
                   </p>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     {product.quantity} unit terjual
                   </p>
                 </div>
               </div>
 
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-foreground">
                 {formatCurrency(product.revenue)}
               </p>
             </div>

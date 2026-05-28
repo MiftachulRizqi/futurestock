@@ -23,22 +23,22 @@ export default async function TransaksiPage() {
         <GlassPanel className="p-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
                 Sales History
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-white">
+              <h1 className="mt-2 text-3xl font-bold text-foreground">
                 Transaksi
               </h1>
 
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Catat penjualan real untuk membentuk pola forecasting AI.
               </p>
             </div>
 
             <Link
               href="/transaksi/tambah"
-              className="inline-flex h-10 items-center justify-center rounded-xl bg-cyan-400 px-4 text-sm font-medium text-slate-950 transition hover:bg-cyan-300"
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
             >
               <Plus className="mr-2 h-4 w-4" />
               Tambah Transaksi
@@ -48,25 +48,25 @@ export default async function TransaksiPage() {
 
         <section className="grid gap-4 md:grid-cols-3">
           <GlassPanel className="p-5">
-            <ReceiptText className="h-6 w-6 text-cyan-300" />
-            <p className="mt-4 text-sm text-slate-400">Total Transaksi</p>
-            <p className="mt-2 text-3xl font-bold text-white">
+            <ReceiptText className="h-6 w-6 text-primary" />
+            <p className="mt-4 text-sm text-muted-foreground">Total Transaksi</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">
               {sales.length}
             </p>
           </GlassPanel>
 
           <GlassPanel className="p-5">
-            <ReceiptText className="h-6 w-6 text-emerald-300" />
-            <p className="mt-4 text-sm text-slate-400">Total Revenue</p>
-            <p className="mt-2 text-3xl font-bold text-white">
+            <ReceiptText className="h-6 w-6 text-primary" />
+            <p className="mt-4 text-sm text-muted-foreground">Total Revenue</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">
               {formatCurrency(totalRevenue)}
             </p>
           </GlassPanel>
 
           <GlassPanel className="p-5">
-            <ReceiptText className="h-6 w-6 text-violet-300" />
-            <p className="mt-4 text-sm text-slate-400">Item Transaksi</p>
-            <p className="mt-2 text-3xl font-bold text-white">
+            <ReceiptText className="h-6 w-6 text-primary" />
+            <p className="mt-4 text-sm text-muted-foreground">Item Transaksi</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">
               {totalItems}
             </p>
           </GlassPanel>

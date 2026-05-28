@@ -24,9 +24,9 @@ export function SalesRevenueChart({ data }: SalesRevenueChartProps) {
   return (
     <GlassPanel className="p-5">
       <div className="mb-5">
-        <h2 className="text-xl font-bold text-white">Revenue 7 Hari</h2>
+        <h2 className="text-xl font-bold text-foreground">Revenue 7 Hari</h2>
 
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-muted-foreground">
           Grafik penjualan real dari transaksi database.
         </p>
       </div>
@@ -42,20 +42,20 @@ export function SalesRevenueChart({ data }: SalesRevenueChartProps) {
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.45} />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
               </linearGradient>
             </defs>
 
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
+              stroke="var(--border)"
             />
 
             <XAxis
               dataKey="day"
               tick={{
-                fill: "#94a3b8",
+                fill: "var(--muted-foreground)",
                 fontSize: 12,
               }}
               axisLine={false}
@@ -64,10 +64,10 @@ export function SalesRevenueChart({ data }: SalesRevenueChartProps) {
 
             <Tooltip
               contentStyle={{
-                background: "#020617",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "var(--card)",
+                border: "1px solid var(--border)",
                 borderRadius: 16,
-                color: "#fff",
+                color: "var(--foreground)",
               }}
               formatter={(value) => {
                 const numericValue =
@@ -80,7 +80,7 @@ export function SalesRevenueChart({ data }: SalesRevenueChartProps) {
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#22d3ee"
+              stroke="var(--primary)"
               strokeWidth={3}
               fill="url(#salesGradient)"
             />

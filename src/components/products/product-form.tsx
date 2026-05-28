@@ -19,32 +19,32 @@ export function ProductForm({
   return (
     <form
       action={action}
-      className="space-y-6 rounded-2xl border border-white/10 bg-slate-950/70 p-6"
+      className="space-y-6 rounded-2xl border border-border bg-card/70 p-6"
     >
       <div className="grid gap-5 md:grid-cols-2">
         {/* NAMA PRODUK */}
         <div className="space-y-2">
-          <Label className="text-slate-200">Nama Produk</Label>
+          <Label className="text-foreground">Nama Produk</Label>
 
           <Input
             name="name"
             defaultValue={product?.name}
             placeholder="Contoh: Beras Ramos 5kg"
             required
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
         {/* SKU */}
         <div className="space-y-2">
-          <Label className="text-slate-200">SKU</Label>
+          <Label className="text-foreground">SKU</Label>
 
           <Input
             name="sku"
             defaultValue={product?.sku}
             placeholder="BR-RAMOS-5KG"
             required
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
@@ -56,7 +56,7 @@ export function ProductForm({
             name="category"
             defaultValue={product?.category ?? ""}
             required
-            className="h-10 w-full rounded-md border border-white/10 bg-slate-950 px-3 text-sm text-white"
+            className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm text-foreground"
           >
             <option value="">Pilih kategori</option>
 
@@ -82,13 +82,13 @@ export function ProductForm({
             defaultValue={product?.price}
             placeholder="68000"
             required
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
         {/* STOK */}
         <div className="space-y-2">
-          <Label className="text-slate-200">Stok</Label>
+          <Label className="text-foreground">Stok</Label>
 
           <Input
             name="stock"
@@ -96,13 +96,13 @@ export function ProductForm({
             defaultValue={product?.stock}
             placeholder="100"
             required
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
         {/* MINIMAL STOK */}
         <div className="space-y-2">
-          <Label className="text-slate-200">Minimal Stok</Label>
+          <Label className="text-foreground">Minimal Stok</Label>
 
           <Input
             name="min_stock"
@@ -110,7 +110,7 @@ export function ProductForm({
             defaultValue={product?.min_stock}
             placeholder="10"
             required
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
@@ -123,31 +123,31 @@ export function ProductForm({
             defaultValue={product?.unit ?? "pcs"}
             placeholder="pcs / dus / kg"
             required
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
         {/* SUPPLIER */}
         <div className="space-y-2">
-          <Label className="text-slate-200">Supplier</Label>
+          <Label className="text-foreground">Supplier</Label>
 
           <Input
             name="supplier"
             defaultValue={product?.supplier ?? ""}
             placeholder="Nama supplier"
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
         {/* BARCODE */}
         <div className="space-y-2">
-          <Label className="text-slate-200">Barcode</Label>
+          <Label className="text-foreground">Barcode</Label>
 
           <Input
             name="barcode"
             defaultValue={product?.barcode ?? ""}
             placeholder="899xxxxxxxxxx"
-            className="bg-white/5 text-white"
+            className="bg-card/5 text-foreground"
           />
         </div>
 
@@ -158,7 +158,7 @@ export function ProductForm({
           <select
             name="status"
             defaultValue={product?.status ?? "active"}
-            className="h-10 w-full rounded-md border border-white/10 bg-slate-950 px-3 text-sm text-white"
+            className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm text-foreground"
           >
             <option value="active">Aktif</option>
             <option value="inactive">Nonaktif</option>
@@ -167,10 +167,10 @@ export function ProductForm({
 
         {/* FOTO */}
         <div className="space-y-3 md:col-span-2">
-          <Label className="text-slate-200">Foto Produk</Label>
+          <Label className="text-foreground">Foto Produk</Label>
 
           {product?.image_url ? (
-            <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+            <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-border bg-card/5">
               <Image
                 src={product.image_url.trim()}
                 alt={product.name}
@@ -186,10 +186,10 @@ export function ProductForm({
             name="image"
             type="file"
             accept="image/*"
-            className="cursor-pointer bg-white/5 text-white file:text-white"
+            className="cursor-pointer bg-card/5 text-foreground file:text-foreground"
           />
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Kosongkan jika tidak ingin mengganti foto. Upload JPG, PNG, atau
             WEBP maksimal 5MB.
           </p>

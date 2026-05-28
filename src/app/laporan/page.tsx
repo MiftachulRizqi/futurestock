@@ -28,15 +28,15 @@ export default async function LaporanPage() {
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
                 Reports Center
               </p>
 
-              <h1 className="mt-2 text-3xl font-bold text-white">
+              <h1 className="mt-2 text-3xl font-bold text-foreground">
                 Laporan
               </h1>
 
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Ringkasan inventaris FutureStock
               </p>
             </div>
@@ -83,7 +83,7 @@ export default async function LaporanPage() {
 
         {/* SUMMARY */}
         <GlassPanel className="p-5">
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-foreground">
             Ringkasan Laporan
           </h2>
         </GlassPanel>

@@ -25,19 +25,19 @@ export default async function DeadStockPage() {
         <GlassPanel className="p-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-rose-300">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-destructive">
                 Dead Stock Intelligence
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-white">
+              <h1 className="mt-2 text-3xl font-bold text-foreground">
                 Dead Stock
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                 Identifikasi produk nonaktif, stok kosong, atau stok berlebih
                 yang berpotensi mengunci modal usaha.
               </p>
             </div>
 
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-rose-400/10 text-rose-300">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-destructive/10 text-destructive">
               <Skull className="h-10 w-10" />
             </div>
           </div>
@@ -71,10 +71,10 @@ export default async function DeadStockPage() {
 
         <GlassPanel className="p-5">
           <div className="mb-5">
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-foreground">
               Daftar Produk Dead Stock
             </h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               Produk yang masuk daftar ini perlu dipromosikan, dikurangi
               pembeliannya, atau dinonaktifkan.
             </p>
@@ -82,11 +82,11 @@ export default async function DeadStockPage() {
 
           <div className="space-y-3">
             {deadStockProducts.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-6 text-center">
-                <p className="font-medium text-white">
+              <div className="rounded-2xl border border-border bg-card/50 p-6 text-center">
+                <p className="font-medium text-foreground">
                   Tidak ada dead stock terdeteksi
                 </p>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Kondisi inventaris saat ini masih sehat.
                 </p>
               </div>
@@ -98,10 +98,10 @@ export default async function DeadStockPage() {
                   <Link
                     key={product.id}
                     href={`/produk/${product.id}`}
-                    className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-slate-950/50 p-4 transition hover:bg-white/5 md:flex-row md:items-center md:justify-between"
+                    className="flex flex-col gap-4 rounded-2xl border border-border bg-card/50 p-4 transition hover:bg-card/5 md:flex-row md:items-center md:justify-between"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                      <div className="overflow-hidden rounded-2xl border border-border bg-card/5">
                         {product.image_url ? (
                           <Image
                             src={product.image_url.trim()}
@@ -112,17 +112,17 @@ export default async function DeadStockPage() {
                             className="h-16 w-16 object-cover"
                           />
                         ) : (
-                          <div className="flex h-16 w-16 items-center justify-center text-xs text-slate-500">
+                          <div className="flex h-16 w-16 items-center justify-center text-xs text-muted-foreground">
                             IMG
                           </div>
                         )}
                       </div>
 
                       <div>
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold text-foreground">
                           {product.name}
                         </p>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">
                           {product.category} · {product.sku}
                         </p>
                       </div>
@@ -135,11 +135,11 @@ export default async function DeadStockPage() {
                         {risk.label}
                       </span>
 
-                      <span className="text-sm text-slate-400">
+                      <span className="text-sm text-muted-foreground">
                         Stok: {product.stock} {product.unit}
                       </span>
 
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-foreground">
                         {formatCurrency(
                           Number(product.price) * Number(product.stock)
                         )}

@@ -32,8 +32,8 @@ export function DashboardLayout({
     useState(false);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(139,92,246,0.14),transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_100%)]" />
+    <div className="min-h-screen overflow-hidden bg-background text-foreground">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(53,138,155,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(53,138,155,0.14),transparent_30%),linear-gradient(180deg,var(--background)_0%,var(--background)_100%)]" />
 
       <AppSidebar />
 
@@ -80,25 +80,25 @@ function MobileSidebar({
         aria-label="Tutup sidebar"
       />
 
-      <aside className="relative h-full w-80 max-w-[85vw] border-r border-white/10 bg-slate-950 p-5 shadow-2xl shadow-black/50">
+      <aside className="relative h-full w-80 max-w-[85vw] border-r border-border bg-background p-5 shadow-2xl shadow-black/50">
         <div className="flex items-center justify-between">
           <Link
             href="/dashboard"
             onClick={onClose}
             className="flex items-center gap-3"
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-500 shadow-lg shadow-cyan-500/20">
-              <span className="font-bold text-white">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary shadow-lg shadow-primary/20">
+              <span className="font-bold text-primary-foreground">
                 FS
               </span>
             </div>
 
             <div>
-              <p className="text-lg font-bold tracking-tight text-white">
+              <p className="text-lg font-bold tracking-tight text-foreground">
                 FutureStock
               </p>
 
-              <p className="text-xs text-cyan-300">
+              <p className="text-xs text-primary">
                 AI Inventory SaaS
               </p>
             </div>
@@ -107,7 +107,7 @@ function MobileSidebar({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-white/10 p-2 text-slate-300 transition hover:bg-white/5 hover:text-white"
+            className="rounded-xl border border-border p-2 text-muted-foreground transition hover:bg-card/5 hover:text-foreground"
             aria-label="Tutup menu"
           >
             <X className="h-5 w-5" />
@@ -133,16 +133,16 @@ function MobileSidebar({
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
                   active
-                    ? "bg-cyan-400/10 text-cyan-200 shadow-[0_0_30px_rgba(34,211,238,0.12)]"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-primary/10 text-primary shadow-[0_0_30px_rgba(53,138,155,0.12)]"
+                    : "text-muted-foreground hover:bg-card/5 hover:text-foreground"
                 )}
               >
                 <Icon
                   className={cn(
                     "h-5 w-5",
                     active
-                      ? "text-cyan-300"
-                      : "text-slate-500"
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   )}
                 />
 

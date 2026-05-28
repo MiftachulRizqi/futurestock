@@ -12,17 +12,17 @@ export function LowStockAlert({ products }: LowStockAlertProps) {
   );
 
   return (
-    <div className="rounded-3xl border border-amber-400/20 bg-amber-400/[0.07] p-5 shadow-2xl shadow-amber-950/20 backdrop-blur">
+    <div className="rounded-3xl border border-primary/20 bg-primary/[0.07] p-5 shadow-2xl shadow-primary/20 backdrop-blur">
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/20 text-amber-300">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-primary">
           <AlertTriangle className="h-6 w-6" />
         </div>
 
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-amber-300">
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
             Low Stock
           </p>
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-foreground">
             Alert Stok Menipis
           </h2>
         </div>
@@ -30,7 +30,7 @@ export function LowStockAlert({ products }: LowStockAlertProps) {
 
       <div className="mt-5 space-y-3">
         {lowStockProducts.length === 0 ? (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Semua stok masih berada di atas minimum.
           </p>
         ) : (
@@ -38,18 +38,18 @@ export function LowStockAlert({ products }: LowStockAlertProps) {
             <Link
               key={product.id}
               href={`/produk/${product.id}`}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/50 p-3 transition hover:bg-white/5"
+              className="flex items-center justify-between rounded-2xl border border-border bg-card/50 p-3 transition hover:bg-card/5"
             >
               <div>
-                <p className="font-medium text-white">{product.name}</p>
-                <p className="text-xs text-slate-500">{product.category}</p>
+                <p className="font-medium text-foreground">{product.name}</p>
+                <p className="text-xs text-muted-foreground">{product.category}</p>
               </div>
 
               <div className="text-right">
-                <p className="text-sm font-semibold text-amber-300">
+                <p className="text-sm font-semibold text-primary">
                   {product.stock} {product.unit}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Min: {product.min_stock}
                 </p>
               </div>
