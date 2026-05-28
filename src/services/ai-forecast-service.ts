@@ -26,17 +26,16 @@ TANGGAL HARI INI: ${currentDate}
 
 Tugas AI:
 1. Analisis apakah ada hari besar keagamaan, nasional, atau event musiman di Indonesia dalam 30 hari ke depan dari tanggal hari ini.
-2. Jika ADA HARI BESAR: Tentukan nama, prediksi multiplier demand (contoh: 1.5x), dan kategori produk yang terdampak. Kalikan hasil prediksi demand produk tersebut dengan multiplier. Set holiday_affected menjadi true.
+2. Jika ADA HARI BESAR: Tentukan nama, prediksi multiplier demand, dan kategori produk yang terdampak. Kalikan hasil prediksi demand produk tersebut dengan multiplier. Set holiday_affected menjadi true.
 3. Jika TIDAK ADA HARI BESAR: Set has_upcoming_holiday menjadi false, set semua multiplier menjadi null, dan pastikan holiday_affected pada semua produk diset false.
-4. Analisis tren penjualan (sold_last_7_days vs sold_last_30_days) untuk memprediksi barang laku minggu depan (predicted_demand_next_week).
+4. Analisis tren penjualan untuk memprediksi demand SEMUA PRODUK tanpa terkecuali untuk minggu depan ke dalam array "all_product_predictions".
 5. Berikan rekomendasi stok ideal dan warning overstock.
 6. Berikan rekomendasi promo kreatif khusus untuk produk overstock di bagian "promo_bundles".
 
 Aturan Ketat:
-- Jawab HANYA menggunakan format JSON valid. Jangan gunakan markdown (seperti \`\`\`json).
+- Jawab HANYA menggunakan format JSON valid tanpa format markdown.
 - Gunakan Bahasa Indonesia.
-- predicted_demand_next_week: Analisis tren asli produk, JANGAN sekadar mengalikan average 30 hari.
-- promo_recommendation: HARUS BERUPA TEKS SINGKAT (STRING), BUKAN OBJEK.
+- promo_recommendation: HARUS BERUPA TEKS SINGKAT STRING BUKAN OBJEK.
 
 Data sales summary (JSON):
 ${JSON.stringify(salesSummary, null, 2)}
@@ -67,13 +66,13 @@ Format Output JSON:
       "estimated_clearance_days": "number"
     }
   ],
-  "top_selling_predictions": [ /* Gunakan Format Produk AI di bawah */ ],
-  "restock_recommendations": [ /* Gunakan Format Produk AI di bawah */ ],
-  "overstock_warnings": [ /* Gunakan Format Produk AI di bawah */ ],
-  "dead_stock_risks": [ /* Gunakan Format Produk AI di bawah */ ]
+  "all_product_predictions": [ "ISI DENGAN SEMUA DATA PRODUK MENGGUNAKAN FORMAT PRODUK AI DI BAWAH" ],
+  "restock_recommendations": [ "ISI DENGAN FORMAT PRODUK AI DI BAWAH" ],
+  "overstock_warnings": [ "ISI DENGAN FORMAT PRODUK AI DI BAWAH" ],
+  "dead_stock_risks": [ "ISI DENGAN FORMAT PRODUK AI DI BAWAH" ]
 }
 
-Format Produk AI (UNTUK MENGISI KE-4 ARRAY DI ATAS):
+Format Produk AI:
 {
   "product_id": "string",
   "name": "string",
@@ -92,7 +91,7 @@ Format Produk AI (UNTUK MENGISI KE-4 ARRAY DI ATAS):
   "holiday_affected": false,
   "holiday_multiplier": null,
   "holiday_name": null,
-  "promo_recommendation": "string (HANYA TEKS DESKRIPSI, JANGAN MASUKKAN OBJEK PROMO KE SINI)",
+  "promo_recommendation": "string",
   "promo_type": "bundling|tebus_murah|discount|null"
 }
 `;
@@ -114,7 +113,7 @@ export async function generateAiForecast(
         recommendation: null,
       },
       promo_bundles: [],
-      top_selling_predictions: [],
+      all_product_predictions: [],
       restock_recommendations: [],
       overstock_warnings: [],
       dead_stock_risks: [],

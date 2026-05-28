@@ -47,7 +47,7 @@ export type AiForecastResult = {
   summary: string;
   holiday_context: HolidayContext;
   promo_bundles: PromoBundle[];
-  top_selling_predictions: AiForecastProduct[];
+  all_product_predictions: AiForecastProduct[];
   restock_recommendations: AiForecastProduct[];
   overstock_warnings: AiForecastProduct[];
   dead_stock_risks: AiForecastProduct[];

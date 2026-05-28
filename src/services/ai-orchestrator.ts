@@ -112,33 +112,30 @@ function createFallbackForecast(
       reason: "Produk belum memiliki penjualan tercatat.",
     }));
 
-  const topSellingItems = [...salesSummary]
-    .sort((a, b) => b.sold_last_7_days - a.sold_last_7_days)
-    .slice(0, 5)
-    .map((item) => ({
-      product_id: item.product_id,
-      name: item.name,
-      sku: item.sku,
-      category: item.category,
-      current_stock: item.current_stock,
-      min_stock: item.min_stock,
-      predicted_demand_next_week: Math.ceil(item.average_daily_sales_30d * 7),
-      recommended_stock: Math.max(
-        Math.ceil(item.average_daily_sales_30d * 14),
-        item.min_stock
-      ),
-      recommended_restock_qty: Math.max(
-        Math.ceil(item.average_daily_sales_30d * 14) - item.current_stock,
-        0
-      ),
-      overstock_warning: false,
-      dead_stock_risk: "low" as const,
-      sales_potential:
-        item.sold_last_7_days > 5 ? ("high" as const) : ("medium" as const),
-      confidence_score: 60,
-      holiday_affected: false,
-      reason: "Produk memiliki histori penjualan tinggi berdasarkan fallback data.",
-    }));
+  const allPredictions = salesSummary.map((item) => ({
+    product_id: item.product_id,
+    name: item.name,
+    sku: item.sku,
+    category: item.category,
+    current_stock: item.current_stock,
+    min_stock: item.min_stock,
+    predicted_demand_next_week: Math.ceil(item.average_daily_sales_30d * 7),
+    recommended_stock: Math.max(
+      Math.ceil(item.average_daily_sales_30d * 14),
+      item.min_stock
+    ),
+    recommended_restock_qty: Math.max(
+      Math.ceil(item.average_daily_sales_30d * 14) - item.current_stock,
+      0
+    ),
+    overstock_warning: false,
+    dead_stock_risk: "low" as const,
+    sales_potential:
+      item.sold_last_7_days > 5 ? ("high" as const) : ("medium" as const),
+    confidence_score: 60,
+    holiday_affected: false,
+    reason: "Produk memiliki histori penjualan tinggi berdasarkan fallback data.",
+  }));
 
   return {
     summary: "Sistem menampilkan analisis fallback berbasis data transaksi lokal karena API sedang tidak tersedia.",
@@ -152,7 +149,7 @@ function createFallbackForecast(
       recommendation: null,
     },
     promo_bundles: promoBundles,
-    top_selling_predictions: topSellingItems,
+    all_product_predictions: allPredictions,
     restock_recommendations: restockItems,
     overstock_warnings: overstockItems,
     dead_stock_risks: deadStockItems,

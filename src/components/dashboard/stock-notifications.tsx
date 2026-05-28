@@ -48,58 +48,58 @@ const notificationStyles: Record<StockNotificationType, NotificationStyle> = {
   "out-of-stock": {
     icon: AlertOctagon,
     label: "Habis",
-    wrapper: "border-rose-400/30 bg-rose-400/[0.09]",
-    iconClass: "bg-rose-400/15 text-rose-300",
-    badge: "border-rose-400/30 bg-rose-400/15 text-rose-100",
-    action: "border-rose-400/25 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20",
+    wrapper: "border-destructive/30 bg-destructive/5",
+    iconClass: "bg-destructive/15 text-destructive",
+    badge: "border-destructive/30 bg-destructive/15 text-destructive",
+    action: "border-destructive/25 bg-destructive/10 text-destructive hover:bg-destructive/20",
   },
   "low-stock": {
     icon: AlertTriangle,
     label: "Hampir habis",
-    wrapper: "border-amber-400/30 bg-amber-400/[0.09]",
-    iconClass: "bg-amber-400/15 text-amber-300",
-    badge: "border-amber-400/30 bg-amber-400/15 text-amber-100",
-    action: "border-amber-400/25 bg-amber-400/10 text-amber-100 hover:bg-amber-400/20",
+    wrapper: "border-amber-400/30 bg-amber-400/5",
+    iconClass: "bg-amber-400/15 text-amber-600",
+    badge: "border-amber-400/30 bg-amber-400/15 text-amber-600",
+    action: "border-amber-400/25 bg-amber-400/10 text-amber-600 hover:bg-amber-400/20",
   },
   "high-demand": {
     icon: Flame,
     label: "Permintaan tinggi",
-    wrapper: "border-orange-400/30 bg-orange-400/[0.09]",
-    iconClass: "bg-orange-400/15 text-orange-300",
-    badge: "border-orange-400/30 bg-orange-400/15 text-orange-100",
-    action: "border-orange-400/25 bg-orange-400/10 text-orange-100 hover:bg-orange-400/20",
+    wrapper: "border-primary/20 bg-background text-primary shadow-sm",
+    iconClass: "bg-primary/10 text-primary",
+    badge: "border-primary/20 bg-primary/10 text-primary",
+    action: "border-primary/25 bg-primary/10 text-primary hover:bg-primary/20",
   },
   "restock-soon": {
     icon: RotateCw,
     label: "Restock segera",
-    wrapper: "border-violet-400/30 bg-violet-400/[0.09]",
-    iconClass: "bg-violet-400/15 text-violet-300",
-    badge: "border-violet-400/30 bg-violet-400/15 text-violet-100",
-    action: "border-violet-400/25 bg-violet-400/10 text-violet-100 hover:bg-violet-400/20",
+    wrapper: "border-violet-400/30 bg-violet-400/5",
+    iconClass: "bg-violet-400/15 text-violet-600",
+    badge: "border-violet-400/30 bg-violet-400/15 text-violet-600",
+    action: "border-violet-400/25 bg-violet-400/10 text-violet-600 hover:bg-violet-400/20",
   },
   safe: {
     icon: CheckCircle2,
     label: "Aman",
-    wrapper: "border-emerald-400/30 bg-emerald-400/[0.09]",
-    iconClass: "bg-emerald-400/15 text-emerald-300",
-    badge: "border-emerald-400/30 bg-emerald-400/15 text-emerald-100",
-    action: "border-emerald-400/25 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20",
+    wrapper: "border-emerald-400/30 bg-emerald-400/5",
+    iconClass: "bg-emerald-400/15 text-emerald-600",
+    badge: "border-emerald-400/30 bg-emerald-400/15 text-emerald-600",
+    action: "border-emerald-400/25 bg-emerald-400/10 text-emerald-600 hover:bg-emerald-400/20",
   },
   "ai-insight": {
     icon: Bot,
     label: "AI Insight",
-    wrapper: "border-blue-400/30 bg-blue-400/[0.09]",
-    iconClass: "bg-blue-400/15 text-blue-300",
-    badge: "border-blue-400/30 bg-blue-400/15 text-blue-100",
-    action: "border-blue-400/25 bg-blue-400/10 text-blue-100 hover:bg-blue-400/20",
+    wrapper: "border-primary/30 bg-primary/5 text-primary",
+    iconClass: "bg-primary/15 text-primary",
+    badge: "border-primary/30 bg-primary/15 text-primary",
+    action: "border-primary/25 bg-primary/10 text-primary hover:bg-primary/20",
   },
   "top-selling": {
     icon: Flame,
     label: "Penjualan tinggi",
-    wrapper: "border-cyan-400/30 bg-cyan-400/[0.09]",
-    iconClass: "bg-cyan-400/15 text-cyan-300",
-    badge: "border-cyan-400/30 bg-cyan-400/15 text-cyan-100",
-    action: "border-cyan-400/25 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/20",
+    wrapper: "border-primary/20 bg-background text-primary shadow-sm",
+    iconClass: "bg-primary/10 text-primary",
+    badge: "border-primary/20 bg-primary/10 text-primary",
+    action: "border-primary/25 bg-primary/10 text-primary hover:bg-primary/20",
   },
 };
 
@@ -232,40 +232,40 @@ export function StockNotifications({
     <>
       <section
         className={cn(
-          "rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur-xl",
+          "rounded-3xl border border-border bg-card p-5 shadow-sm",
           className
         )}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-300">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <BellRing className="h-5 w-5" />
             </div>
 
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.25em] text-amber-300">
+              <p className="text-xs font-medium uppercase tracking-[0.25em] text-primary/70">
                 Smart Alerts
               </p>
-              <h2 className="mt-1 text-xl font-bold text-white">
+              <h2 className="mt-1 text-xl font-bold text-foreground">
                 Notifikasi Stok Otomatis
               </h2>
             </div>
           </div>
 
           <div className="flex flex-col items-end gap-2">
-            <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-3 py-1 text-xs font-semibold text-rose-100">
+            <span className="rounded-full border border-destructive/20 bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
               {visibleNotifications.length} aktif
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               <Radio className="h-3.5 w-3.5" />
               Live
             </span>
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <span>Auto update stok</span>
-          <span className="h-1 w-1 rounded-full bg-slate-600" />
+          <span className="h-1 w-1 rounded-full bg-border" />
           <span>Sinkron {lastUpdated}</span>
         </div>
 
@@ -339,10 +339,10 @@ function NotificationItem({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-foreground">
                 {notification.title}
               </p>
-              <p className="mt-0.5 truncate text-sm font-medium text-slate-300">
+              <p className="mt-0.5 truncate text-sm font-medium text-muted-foreground">
                 {notification.productName}
               </p>
             </div>
@@ -360,7 +360,7 @@ function NotificationItem({
               <button
                 type="button"
                 onClick={() => onDismiss(notification.id)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/10 hover:text-white"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
                 aria-label={`Tutup notifikasi ${notification.productName}`}
               >
                 <X className="h-4 w-4" />
@@ -368,11 +368,11 @@ function NotificationItem({
             </div>
           </div>
 
-          <p className="mt-3 text-sm leading-6 text-slate-400">
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
             {notification.message}
           </p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span>{notification.timestamp}</span>
             {typeof notification.stock === "number" ? (
               <span>Stok: {notification.stock}</span>
@@ -396,7 +396,7 @@ function NotificationItem({
 
             <Link
               href={detailHref}
-              className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-xs font-semibold text-slate-200 transition hover:bg-white/10"
+              className="inline-flex h-9 items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 text-xs font-semibold text-foreground transition hover:bg-muted"
             >
               <Eye className="h-4 w-4" />
               Lihat Detail
@@ -433,7 +433,7 @@ function ToastStack({
               exit={{ opacity: 0, x: 24, scale: 0.98 }}
               transition={{ duration: 0.22 }}
               className={cn(
-                "pointer-events-auto rounded-2xl border p-4 shadow-2xl shadow-black/30 backdrop-blur-xl",
+                "pointer-events-auto rounded-2xl border p-4 shadow-xl backdrop-blur-xl",
                 style.wrapper
               )}
             >
@@ -450,10 +450,10 @@ function ToastStack({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-sm font-semibold text-primary">
                         {toast.title}
                       </p>
-                      <p className="mt-1 text-sm leading-5 text-slate-300">
+                      <p className="mt-1 text-sm leading-5 text-primary/80">
                         {toast.message}
                       </p>
                     </div>
@@ -461,7 +461,7 @@ function ToastStack({
                     <button
                       type="button"
                       onClick={() => onClose(toast.toastId)}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/10 hover:text-white"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-primary/60 transition hover:bg-primary/10 hover:text-primary"
                       aria-label="Tutup toast notifikasi"
                     >
                       <X className="h-4 w-4" />
@@ -479,12 +479,12 @@ function ToastStack({
 
 function StockNotificationsEmptyState() {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/30 p-6 text-center">
-      <CheckCircle2 className="h-10 w-10 text-emerald-400" />
-      <p className="mt-3 text-sm font-medium text-white">
+    <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-center">
+      <CheckCircle2 className="h-10 w-10 text-primary/50" />
+      <p className="mt-3 text-sm font-medium text-foreground">
         Semua stok berada di zona aman
       </p>
-      <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">
+      <p className="mt-1 max-w-xs text-xs leading-5 text-muted-foreground">
         Alert stok baru akan muncul otomatis ketika ada produk yang perlu
         dipantau.
       </p>
@@ -496,16 +496,16 @@ function StockNotificationsSkeleton({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-cyan-950/20 backdrop-blur",
+        "rounded-3xl border border-border bg-card p-5 shadow-sm",
         className
       )}
     >
       <div className="space-y-4">
-        <div className="h-11 w-52 animate-pulse rounded-2xl bg-white/10" />
+        <div className="h-11 w-52 animate-pulse rounded-2xl bg-muted" />
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
-            className="h-28 animate-pulse rounded-2xl bg-white/10"
+            className="h-28 animate-pulse rounded-2xl bg-muted"
           />
         ))}
       </div>

@@ -64,11 +64,11 @@ export default async function PrediksiAiPage() {
           <OverstockPromoAlert promoBundles={forecast.promo_bundles} />
         )}
 
-        <section className="grid gap-6 xl:grid-cols-2">
+        <section className="grid gap-6 grid-cols-1">
           <ForecastSection
-            title="Produk Berpotensi Laku Minggu Depan"
-            description="Produk dengan potensi demand tertinggi berdasarkan tren penjualan."
-            items={forecast.top_selling_predictions}
+            title="Prediksi Demand Semua Produk Minggu Depan"
+            description="Perkiraan permintaan untuk seluruh inventaris Anda berdasarkan tren dan event mendatang."
+            items={forecast.all_product_predictions}
           />
 
           <ForecastSection
@@ -97,144 +97,104 @@ export default async function PrediksiAiPage() {
 function ForecastSection({
   title,
   description,
-  items,
+  items = [], 
 }: {
   title: string;
   description: string;
-  items: AiForecastProduct[];
+  items?: AiForecastProduct[];
 }) {
+  const safeItems = items || [];
+
   return (
-    <GlassPanel className="p-5">
+    <GlassPanel className="p-5 overflow-hidden">
       <div>
         <h2 className="text-xl font-bold text-foreground">{title}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </div>
 
-      <div className="mt-5 space-y-3">
-        {items.length === 0 ? (
+      <div className="mt-5 w-full overflow-x-auto">
+        {safeItems.length === 0 ? (
           <div className="rounded-2xl border border-border bg-card/50 p-5 text-sm text-muted-foreground">
             Tidak ada data untuk kategori ini.
           </div>
         ) : (
-          items.map((item) => (
-            <div
-              key={`${title}-${item.product_id}`}
-              className="rounded-2xl border border-border bg-card/50 p-4"
-            >
-              <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
-                <div>
-                  <p className="font-semibold text-foreground">{item.name}</p>
-
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.category} · {item.sku}
-                  </p>
-                </div>
-
-                <span className="w-fit rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
-                  {item.confidence_score}% confidence
-                </span>
-              </div>
-
-              <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                <MiniMetric
-                  label="Stok Saat Ini"
-                  value={item.current_stock}
-                />
-
-                <MiniMetric
-                  label="Prediksi Demand"
-                  value={item.predicted_demand_next_week}
-                />
-
-                <MiniMetric
-                  label="Saran Restock"
-                  value={item.recommended_restock_qty}
-                />
-              </div>
-
-              <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                <MiniMetric
-                  label="Stok Ideal"
-                  value={item.recommended_stock}
-                />
-
-                <MiniMetric
-                  label="Potensi Laku"
-                  value={translatePotential(item.sales_potential)}
-                />
-
-                <MiniMetric
-                  label="Risiko Dead Stock"
-                  value={translateRisk(item.dead_stock_risk)}
-                />
-              </div>
-
-              {item.holiday_affected ? (
-                <div className="mt-4 rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span className="font-semibold text-primary">
-                      Terdampak {item.holiday_name}
-                    </span>
-                  </div>
-                  <p className="text-primary">
-                    Demand ditingkatkan {item.holiday_multiplier}x karena hari besar
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-4 rounded-xl border border-border bg-card/30 p-3 text-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-semibold text-muted-foreground">
-                      Tidak ada hari besar terdekat
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground">
-                    Prediksi demand berjalan normal berdasarkan histori tren penjualan.
-                  </p>
-                </div>
-              )}
-
-              {item.overstock_warning ? (
-                <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-200">
-                  Produk ini terindikasi overstock. Pertimbangkan promo,
-                  bundling, atau kurangi pembelian berikutnya.
-                </div>
-              ) : null}
-
-              {/* SABUK PENGAMAN: Jika AI malah kirim object, kita ekstrak stringnya */}
-              {item.promo_recommendation ? (
-                <div className="mt-4 rounded-xl border border-primary/20 bg-primary/10 p-3 text-sm text-primary">
-                  <span className="font-medium">💡 Saran Promo:</span>{" "}
-                  {typeof item.promo_recommendation === "string" 
-                    ? item.promo_recommendation 
-                    : (item.promo_recommendation as any).promo_description || "Lihat rekomendasi promo di atas"}
-                </div>
-              ) : null}
-
-              <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                {typeof item.reason === "string" ? item.reason : "Analisis AI."}
-              </p>
-            </div>
-          ))
+          <div className="rounded-xl border border-border bg-card/30">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="border-b border-border bg-muted/20 text-foreground">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Nama Produk</th>
+                  <th className="px-4 py-3 font-semibold">Kategori / SKU</th>
+                  <th className="px-4 py-3 font-semibold text-center">Stok</th>
+                  <th className="px-4 py-3 font-semibold text-center text-primary">Demand Mingguan</th>
+                  <th className="px-4 py-3 font-semibold text-center">Saran Restock</th>
+                  <th className="px-4 py-3 font-semibold text-center">Potensi</th>
+                  <th className="px-4 py-3 font-semibold text-center">Risiko</th>
+                  <th className="px-4 py-3 font-semibold">Catatan AI</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {safeItems.map((item) => (
+                  <tr key={`${title}-${item.product_id}`} className="hover:bg-muted/10 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-foreground">{item.name}</div>
+                      <div className="mt-1 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        {item.confidence_score}% conf
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {item.category}
+                      <br />
+                      <span className="text-xs opacity-70">{item.sku}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center text-foreground">{item.current_stock}</td>
+                    <td className="px-4 py-3 text-center font-bold text-primary">{item.predicted_demand_next_week}</td>
+                    <td className="px-4 py-3 text-center text-foreground">{item.recommended_restock_qty}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${
+                        item.sales_potential === 'high' ? 'bg-emerald-500/10 text-emerald-500' :
+                        item.sales_potential === 'medium' ? 'bg-amber-500/10 text-amber-500' :
+                        'bg-red-500/10 text-red-500'
+                      }`}>
+                        {translatePotential(item.sales_potential)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${
+                        item.dead_stock_risk === 'high' ? 'bg-red-500/10 text-red-500' :
+                        item.dead_stock_risk === 'medium' ? 'bg-amber-500/10 text-amber-500' :
+                        'bg-emerald-500/10 text-emerald-500'
+                      }`}>
+                        {translateRisk(item.dead_stock_risk)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs max-w-[250px] whitespace-normal text-muted-foreground">
+                      <div className="space-y-1">
+                        {item.holiday_affected && (
+                          <div className="text-primary font-medium flex items-center gap-1">
+                            <Calendar className="h-3 w-3" /> Event: {item.holiday_name}
+                          </div>
+                        )}
+                        {item.overstock_warning && (
+                          <div className="text-amber-500 font-medium">⚠️ Overstock</div>
+                        )}
+                        {item.promo_recommendation && (
+                          <div className="text-emerald-500">
+                            💡 {typeof item.promo_recommendation === "string" ? item.promo_recommendation : (item.promo_recommendation as any).promo_description}
+                          </div>
+                        )}
+                        {!item.holiday_affected && !item.overstock_warning && !item.promo_recommendation && (
+                          <span>Tren normal</span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </GlassPanel>
-  );
-}
-
-function MiniMetric({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-card/[0.03] p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 font-semibold text-foreground">{value}</p>
-    </div>
   );
 }
 
@@ -244,7 +204,6 @@ function translateRisk(value: AiForecastProduct["dead_stock_risk"]) {
     medium: "Sedang",
     high: "Tinggi",
   };
-
   return map[value] || "Tidak diketahui";
 }
 
@@ -254,6 +213,5 @@ function translatePotential(value: AiForecastProduct["sales_potential"]) {
     medium: "Sedang",
     high: "Tinggi",
   };
-
   return map[value] || "Tidak diketahui";
 }
