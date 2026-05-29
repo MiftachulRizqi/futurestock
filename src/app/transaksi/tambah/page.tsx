@@ -1,14 +1,31 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { SaleForm } from "@/components/sales/sale-form";
 import { getProducts } from "@/services/product-service";
+import { getLatestAiForecast } from "@/services/ai-cache-service";
 import { createSaleAction } from "../actions";
 
 export default async function TambahTransaksiPage() {
   const products = await getProducts();
+  const latestForecast = await getLatestAiForecast();
 
   const activeProducts = products.filter(
     (product) => product.status === "active" && Number(product.stock) > 0
   );
+
+  const aiDiscounts =
+    latestForecast?.forecast_data.promo_bundles
+      ?.filter((promo) => {
+        return (
+          promo.promo_type === "discount" &&
+          promo.primary_product_id &&
+          Number(promo.discount_percentage || 0) > 0
+        );
+      })
+      .map((promo) => ({
+        productId: promo.primary_product_id,
+        discountPercentage: Number(promo.discount_percentage || 0),
+        reason: promo.promo_description,
+      })) ?? [];
 
   return (
     <DashboardLayout>
@@ -38,7 +55,11 @@ export default async function TambahTransaksiPage() {
             </p>
           </div>
         ) : (
-          <SaleForm products={activeProducts} action={createSaleAction} />
+          <SaleForm
+            products={activeProducts}
+            action={createSaleAction}
+            aiDiscounts={aiDiscounts}
+          />
         )}
       </div>
     </DashboardLayout>

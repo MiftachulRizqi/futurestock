@@ -1,133 +1,309 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/services/auth-service";
-import {
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  getProductById,
-} from "@/services/product-service";
-import { productSchema } from "@/lib/validations/product";
+import { logActivity } from "@/services/activity-log-service";
 
-const PRODUCT_IMAGE_BUCKET = "product-images";
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-
-async function requireActiveSession() {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+function getString(formData: FormData, key: string) {
+  return String(formData.get(key) || "").trim();
 }
 
-async function uploadProductImage(file: File) {
+function getNumber(formData: FormData, key: string) {
+  return Number(formData.get(key) || 0);
+}
+
+async function getCurrentStoreId() {
   const supabase = await createClient();
 
-  if (!file || file.size === 0) {
-    return null;
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("Anda harus login terlebih dahulu.");
   }
 
-  if (!file.type.startsWith("image/")) {
-    throw new Error("File harus berupa gambar.");
+  const { data: member, error: memberError } = await supabase
+    .from("store_members")
+    .select("store_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .single();
+
+  if (memberError || !member?.store_id) {
+    throw new Error("Workspace toko tidak ditemukan untuk akun ini.");
   }
 
-  if (file.size > MAX_IMAGE_SIZE) {
-    throw new Error("Ukuran gambar maksimal 5MB.");
-  }
+  return {
+    supabase,
+    user,
+    storeId: member.store_id as string,
+  };
+}
 
-  const fileExt = file.name.split(".").pop() || "png";
-  const fileName = `${crypto.randomUUID()}.${fileExt}`;
-  const filePath = `products/${fileName}`;
-
-  const { error } = await supabase.storage
-    .from(PRODUCT_IMAGE_BUCKET)
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const { data } = supabase.storage
-    .from(PRODUCT_IMAGE_BUCKET)
-    .getPublicUrl(filePath);
-
-  return data.publicUrl;
+function revalidateProductRelatedPaths() {
+  revalidatePath("/produk");
+  revalidatePath("/dashboard");
+  revalidatePath("/inventaris");
+  revalidatePath("/analitik");
+  revalidatePath("/prediksi-ai");
+  revalidatePath("/dead-stock");
+  revalidatePath("/laporan");
 }
 
 export async function createProductAction(formData: FormData) {
-  await requireActiveSession();
+  const { supabase, user, storeId } = await getCurrentStoreId();
 
-  const image = formData.get("image");
+  const name = getString(formData, "name");
+  const sku = getString(formData, "sku");
+  const category = getString(formData, "category");
+  const supplier = getString(formData, "supplier");
+  const unit = getString(formData, "unit") || "pcs";
+  const imageUrl = getString(formData, "image_url");
+  const status = getString(formData, "status") || "active";
 
-  const uploadedImageUrl =
-    image instanceof File && image.size > 0
-      ? await uploadProductImage(image)
-      : null;
+  const stock = getNumber(formData, "stock");
+  const minStock = getNumber(formData, "min_stock");
+  const price = getNumber(formData, "price");
 
-  const values = productSchema.parse({
-    name: formData.get("name"),
-    sku: formData.get("sku"),
-    category: formData.get("category"),
-    price: formData.get("price"),
-    stock: formData.get("stock"),
-    min_stock: formData.get("min_stock"),
-    unit: formData.get("unit"),
-    supplier: formData.get("supplier"),
-    barcode: formData.get("barcode"),
-    image_url: uploadedImageUrl ?? "",
-    status: formData.get("status"),
-  });
-
-  await createProduct(values);
-
-  redirect("/produk");
-}
-
-export async function updateProductAction(id: string, formData: FormData) {
-  await requireActiveSession();
-
-  const currentProduct = await getProductById(id);
-
-  if (!currentProduct) {
-    throw new Error("Produk tidak ditemukan.");
+  if (!name || !sku || !category) {
+    throw new Error("Nama produk, SKU, dan kategori wajib diisi.");
   }
 
-  const image = formData.get("image");
+  if (stock < 0 || minStock < 0 || price < 0) {
+    throw new Error("Stok, minimum stok, dan harga tidak boleh negatif.");
+  }
 
-  const uploadedImageUrl =
-    image instanceof File && image.size > 0
-      ? await uploadProductImage(image)
-      : null;
+  const { data: product, error } = await supabase
+    .from("products")
+    .insert({
+      store_id: storeId,
+      name,
+      sku,
+      category,
+      supplier: supplier || null,
+      unit,
+      image_url: imageUrl || null,
+      stock,
+      min_stock: minStock,
+      price,
+      status,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
 
-  const values = productSchema.parse({
-    name: formData.get("name"),
-    sku: formData.get("sku"),
-    category: formData.get("category"),
-    price: formData.get("price"),
-    stock: formData.get("stock"),
-    min_stock: formData.get("min_stock"),
-    unit: formData.get("unit"),
-    supplier: formData.get("supplier"),
-    barcode: formData.get("barcode"),
-    image_url: uploadedImageUrl ?? currentProduct.image_url ?? "",
-    status: formData.get("status"),
+  if (error || !product) {
+    throw new Error(error?.message || "Produk gagal ditambahkan.");
+  }
+
+  await logActivity({
+    storeId,
+    userId: user.id,
+    action: "create",
+    entityType: "product",
+    entityId: product.id,
+    title: "Produk baru ditambahkan",
+    description: `Produk ${name} berhasil ditambahkan ke inventaris.`,
+    metadata: {
+      product_id: product.id,
+      name,
+      sku,
+      category,
+      stock,
+      min_stock: minStock,
+      price,
+      status,
+    },
   });
 
-  await updateProduct(id, values);
+  revalidateProductRelatedPaths();
 
-  redirect("/produk");
+  redirect("/produk?toast=product-created");
 }
 
-export async function deleteProductAction(id: string) {
-  await requireActiveSession();
+export async function updateProductAction(formData: FormData) {
+  const { supabase, user, storeId } = await getCurrentStoreId();
 
-  await deleteProduct(id);
+  const productId = getString(formData, "product_id");
 
-  redirect("/produk");
+  const name = getString(formData, "name");
+  const sku = getString(formData, "sku");
+  const category = getString(formData, "category");
+  const supplier = getString(formData, "supplier");
+  const unit = getString(formData, "unit") || "pcs";
+  const imageUrl = getString(formData, "image_url");
+  const status = getString(formData, "status") || "active";
+
+  const stock = getNumber(formData, "stock");
+  const minStock = getNumber(formData, "min_stock");
+  const price = getNumber(formData, "price");
+
+  if (!productId) {
+    throw new Error("ID produk tidak ditemukan.");
+  }
+
+  if (!name || !sku || !category) {
+    throw new Error("Nama produk, SKU, dan kategori wajib diisi.");
+  }
+
+  if (stock < 0 || minStock < 0 || price < 0) {
+    throw new Error("Stok, minimum stok, dan harga tidak boleh negatif.");
+  }
+
+  const { data: oldProduct } = await supabase
+    .from("products")
+    .select("id, name, sku, category, stock, min_stock, price, status")
+    .eq("id", productId)
+    .eq("store_id", storeId)
+    .single();
+
+  const { error } = await supabase
+    .from("products")
+    .update({
+      name,
+      sku,
+      category,
+      supplier: supplier || null,
+      unit,
+      image_url: imageUrl || null,
+      stock,
+      min_stock: minStock,
+      price,
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", productId)
+    .eq("store_id", storeId);
+
+  if (error) {
+    throw new Error(error.message || "Produk gagal diperbarui.");
+  }
+
+  await logActivity({
+    storeId,
+    userId: user.id,
+    action: "update",
+    entityType: "product",
+    entityId: productId,
+    title: "Produk diperbarui",
+    description: `Produk ${name} berhasil diperbarui.`,
+    metadata: {
+      product_id: productId,
+      before: oldProduct ?? null,
+      after: {
+        name,
+        sku,
+        category,
+        stock,
+        min_stock: minStock,
+        price,
+        status,
+      },
+    },
+  });
+
+  revalidateProductRelatedPaths();
+  revalidatePath(`/produk/${productId}`);
+  revalidatePath(`/produk/${productId}/edit`);
+
+  redirect("/produk?toast=product-updated");
+}
+
+export async function deleteProductWithResultAction(formData: FormData) {
+  try {
+    const { supabase, user, storeId } = await getCurrentStoreId();
+
+    const productId = getString(formData, "product_id");
+
+    if (!productId) {
+      return {
+        success: false,
+        message: "ID produk tidak ditemukan.",
+      };
+    }
+
+    const { data: product, error: productError } = await supabase
+      .from("products")
+      .select("id, store_id, name, sku, category, stock, price, status")
+      .eq("id", productId)
+      .eq("store_id", storeId)
+      .single();
+
+    if (productError || !product) {
+      return {
+        success: false,
+        message: "Produk tidak ditemukan di workspace toko ini.",
+      };
+    }
+
+    const { count, error: usageError } = await supabase
+      .from("sales_items")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq("product_id", productId);
+
+    if (usageError) {
+      return {
+        success: false,
+        message:
+          usageError.message || "Gagal memeriksa riwayat transaksi produk.",
+      };
+    }
+
+    if ((count ?? 0) > 0) {
+      return {
+        success: false,
+        message:
+          "Produk ini sudah digunakan dalam transaksi, sehingga tidak bisa dihapus permanen. Ubah status produk menjadi Nonaktif agar riwayat transaksi, laporan, analytics, dan prediksi AI tetap aman.",
+      };
+    }
+
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId)
+      .eq("store_id", storeId);
+
+    if (error) {
+      return {
+        success: false,
+        message: error.message || "Produk gagal dihapus.",
+      };
+    }
+
+    await logActivity({
+      storeId,
+      userId: user.id,
+      action: "delete",
+      entityType: "product",
+      entityId: productId,
+      title: "Produk dihapus",
+      description: `Produk ${product.name} berhasil dihapus dari inventaris.`,
+      metadata: {
+        product,
+      },
+    });
+
+    revalidateProductRelatedPaths();
+
+    return {
+      success: true,
+      message: "Produk berhasil dihapus.",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat menghapus produk.",
+    };
+  }
 }

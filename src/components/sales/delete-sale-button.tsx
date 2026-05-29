@@ -26,9 +26,7 @@ export function DeleteSaleButton({
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
-  const [dialogState, setDialogState] =
-    useState<DialogState>("confirm");
-
+  const [dialogState, setDialogState] = useState<DialogState>("confirm");
   const [errorMessage, setErrorMessage] = useState("");
 
   const [isPending, startTransition] = useTransition();
@@ -62,8 +60,7 @@ export function DeleteSaleButton({
       const formData = new FormData();
       formData.append("sale_id", saleId);
 
-      const result =
-        await deleteSaleWithResultAction(formData);
+      const result = await deleteSaleWithResultAction(formData);
 
       if (!result.success) {
         setErrorMessage(
@@ -95,11 +92,7 @@ export function DeleteSaleButton({
         <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
           <div
             className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
-            onClick={
-              dialogState === "confirm"
-                ? closeDialog
-                : undefined
-            }
+            onClick={dialogState === "confirm" ? closeDialog : undefined}
           />
 
           <div className="relative z-10 w-full max-w-[430px] overflow-hidden rounded-md bg-white shadow-[0_25px_80px_rgba(0,0,0,0.35)]">
@@ -120,17 +113,18 @@ export function DeleteSaleButton({
                     <AlertTriangle className="h-11 w-11 text-amber-400" />
                   </div>
 
-                  <h2 className="mt-7 text-[36px] font-semibold tracking-tight text-slate-700">
-                    Are you sure?
+                  <h2 className="mt-7 text-[32px] font-semibold tracking-tight text-slate-700">
+                    Hapus transaksi?
                   </h2>
 
-                  <p className="mt-3 text-[16px] text-slate-500">
-                    You won&apos;t be able to revert this!
+                  <p className="mt-3 text-[16px] leading-7 text-slate-500">
+                    Transaksi yang sudah dihapus tidak dapat dikembalikan.
+                    Stok produk terkait akan dikembalikan secara otomatis.
                   </p>
 
                   {invoiceNumber ? (
                     <p className="mt-3 text-sm text-slate-400">
-                      Invoice:{" "}
+                      Nomor invoice:{" "}
                       <span className="font-semibold text-slate-600">
                         {invoiceNumber}
                       </span>
@@ -142,17 +136,17 @@ export function DeleteSaleButton({
                       type="button"
                       onClick={handleDelete}
                       disabled={isPending}
-                      className="inline-flex min-w-[145px] items-center justify-center gap-2 rounded-md bg-sky-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-md bg-sky-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {isPending ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Deleting...
+                          Menghapus...
                         </>
                       ) : (
                         <>
                           <Trash2 className="h-4 w-4" />
-                          Yes, delete it!
+                          Ya, hapus
                         </>
                       )}
                     </button>
@@ -163,7 +157,7 @@ export function DeleteSaleButton({
                       disabled={isPending}
                       className="inline-flex min-w-[110px] items-center justify-center rounded-md bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      Cancel
+                      Batal
                     </button>
                   </div>
                 </div>
@@ -184,7 +178,7 @@ export function DeleteSaleButton({
                 </h2>
 
                 <p className="mt-5 text-[18px] text-slate-500">
-                  Data berhasil dihapus!
+                  Transaksi berhasil dihapus dan stok produk sudah dikembalikan.
                 </p>
 
                 <button
@@ -211,8 +205,7 @@ export function DeleteSaleButton({
                 </h2>
 
                 <p className="mt-5 text-[16px] leading-7 text-slate-500">
-                  {errorMessage ||
-                    "Data gagal dihapus."}
+                  {errorMessage || "Transaksi gagal dihapus."}
                 </p>
 
                 <button

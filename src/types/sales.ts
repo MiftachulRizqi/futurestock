@@ -15,6 +15,9 @@ export type SaleItem = {
   product_id: string;
   quantity: number;
   unit_price: number;
+  discount_percentage: number;
+  discount_amount: number;
+  final_unit_price: number;
   subtotal: number;
   created_at: string;
 };
@@ -33,7 +36,7 @@ export type SaleWithItems = Sale & {
         price: number;
         unit: string;
         status: "active" | "inactive";
-      };
+      } | null;
     }
   >;
 };

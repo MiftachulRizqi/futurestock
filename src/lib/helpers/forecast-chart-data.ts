@@ -188,6 +188,10 @@ function getProductMetaById(products: Product[], sales: SaleWithItems[]) {
         return;
       }
 
+      if (!item.products) {
+        return;
+      }
+
       productMetaById.set(item.product_id, {
         id: item.product_id,
         name: item.products.name,

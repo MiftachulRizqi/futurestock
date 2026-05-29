@@ -18,12 +18,6 @@ export default async function EditProdukPage({ params }: EditProdukPageProps) {
     notFound();
   }
 
-  async function action(formData: FormData) {
-    "use server";
-
-    await updateProductAction(id, formData);
-  }
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -35,7 +29,7 @@ export default async function EditProdukPage({ params }: EditProdukPageProps) {
         </div>
 
         <ProductForm
-          action={action}
+          action={updateProductAction}
           product={product}
           submitLabel="Simpan Perubahan"
         />

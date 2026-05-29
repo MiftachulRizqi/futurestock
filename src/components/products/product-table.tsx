@@ -24,28 +24,40 @@ type ProductTableProps = {
   products: Product[];
 };
 
+function safeText(value: unknown) {
+  return String(value ?? "");
+}
+
 export function ProductTable({ products }: ProductTableProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 
   const categories = useMemo(() => {
-    return Array.from(new Set(products.map((product) => product.category)))
+    return Array.from(
+      new Set(products.map((product) => safeText(product.category)))
+    )
       .filter(Boolean)
       .sort();
   }, [products]);
 
   const filteredProducts = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
     return products.filter((product) => {
-      const keyword = search.toLowerCase();
+      const productName = safeText(product.name).toLowerCase();
+      const productSku = safeText(product.sku).toLowerCase();
+      const productCategory = safeText(product.category).toLowerCase();
+      const productSupplier = safeText(product.supplier).toLowerCase();
 
       const matchSearch =
-        product.name.toLowerCase().includes(keyword) ||
-        product.sku.toLowerCase().includes(keyword) ||
-        product.category.toLowerCase().includes(keyword) ||
-        (product.supplier || "").toLowerCase().includes(keyword);
+        !keyword ||
+        productName.includes(keyword) ||
+        productSku.includes(keyword) ||
+        productCategory.includes(keyword) ||
+        productSupplier.includes(keyword);
 
       const matchCategory =
-        category === "all" || product.category === category;
+        category === "all" || safeText(product.category) === category;
 
       return matchSearch && matchCategory;
     });
@@ -153,43 +165,47 @@ export function ProductTable({ products }: ProductTableProps) {
           {
             key: "name",
             header: "Produk",
-            render: (product) => (
-              <div className="flex items-center gap-3">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted">
-                  {product.image_url ? (
-                    <Image
-                      src={product.image_url.trim()}
-                      alt={product.name}
-                      width={48}
-                      height={48}
-                      unoptimized
-                      className="h-12 w-12 object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-muted-foreground">
-                      IMG
-                    </div>
-                  )}
-                </div>
+            render: (product) => {
+              const productName = safeText(product.name) || "Tanpa nama";
 
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-foreground">
-                    {product.name}
-                  </p>
+              return (
+                <div className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted">
+                    {product.image_url ? (
+                      <Image
+                        src={product.image_url.trim()}
+                        alt={productName}
+                        width={48}
+                        height={48}
+                        unoptimized
+                        className="h-12 w-12 object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-muted-foreground">
+                        IMG
+                      </div>
+                    )}
+                  </div>
 
-                  <p className="truncate text-xs text-muted-foreground">
-                    {product.supplier || "Tanpa supplier"}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-foreground">
+                      {productName}
+                    </p>
+
+                    <p className="truncate text-xs text-muted-foreground">
+                      {safeText(product.supplier) || "Tanpa supplier"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ),
+              );
+            },
           },
           {
             key: "sku",
             header: "SKU",
             render: (product) => (
               <span className="font-medium text-muted-foreground">
-                {product.sku}
+                {safeText(product.sku) || "-"}
               </span>
             ),
           },
@@ -198,7 +214,7 @@ export function ProductTable({ products }: ProductTableProps) {
             header: "Kategori",
             render: (product) => (
               <span className="rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                {product.category}
+                {safeText(product.category) || "Tanpa kategori"}
               </span>
             ),
           },
@@ -206,7 +222,9 @@ export function ProductTable({ products }: ProductTableProps) {
             key: "stock",
             header: "Stok",
             render: (product) => {
-              const isLowStock = product.stock <= product.min_stock;
+              const stock = Number(product.stock ?? 0);
+              const minStock = Number(product.min_stock ?? 0);
+              const isLowStock = stock <= minStock;
 
               return (
                 <div>
@@ -217,10 +235,11 @@ export function ProductTable({ products }: ProductTableProps) {
                         : "font-semibold text-foreground"
                     }
                   >
-                    {product.stock} {product.unit}
+                    {stock} {safeText(product.unit) || "unit"}
                   </p>
+
                   <p className="text-xs text-muted-foreground">
-                    Min. {product.min_stock} {product.unit}
+                    Min. {minStock} {safeText(product.unit) || "unit"}
                   </p>
                 </div>
               );
@@ -231,7 +250,7 @@ export function ProductTable({ products }: ProductTableProps) {
             header: "Harga",
             render: (product) => (
               <span className="font-semibold text-foreground">
-                {formatCurrency(Number(product.price))}
+                {formatCurrency(Number(product.price ?? 0))}
               </span>
             ),
           },
@@ -270,7 +289,10 @@ export function ProductTable({ products }: ProductTableProps) {
                   </Link>
                 </Button>
 
-                <DeleteProductButton productId={product.id} />
+                <DeleteProductButton
+                  productId={product.id}
+                  productName={safeText(product.name)}
+                />
               </div>
             ),
           },

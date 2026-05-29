@@ -8,15 +8,14 @@ import { cn } from "@/lib/utils"
 function Input({
   className,
   type,
-  onInput,
   ...props
-}: React.ComponentProps<"input">) {
+}: React.ComponentProps<typeof InputPrimitive>) {
   function handleInput(event: React.FormEvent<HTMLInputElement>) {
     if (type === "number") {
-      event.currentTarget.value = normalizeNumberInput(event.currentTarget.value)
+      event.currentTarget.value = normalizeNumberInput(
+        event.currentTarget.value
+      )
     }
-
-    onInput?.(event)
   }
 
   return (

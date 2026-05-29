@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   CircleDollarSign,
   ReceiptText,
   ShoppingBag,
@@ -6,6 +7,7 @@ import {
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { InventoryEmptyState } from "@/components/states/inventory-empty-state";
 
 import { SalesRevenueChart } from "@/components/analytics/sales-revenue-chart";
 import { TopSellingProducts } from "@/components/analytics/top-selling-products";
@@ -26,23 +28,18 @@ import { formatCurrency } from "@/lib/helpers/format";
 export default async function AnalitikPage() {
   const sales = await getSales();
 
-  const revenueChartData =
-    getDailySalesChartData(sales);
-
-  const monthlyRevenue =
-    getMonthlyRevenue(sales);
-
-  const topSellingProducts =
-    getTopSellingProducts(sales);
-
-  const inventoryTurnover =
-    getInventoryTurnover(sales);
+  const revenueChartData = getDailySalesChartData(sales);
+  const monthlyRevenue = getMonthlyRevenue(sales);
+  const topSellingProducts = getTopSellingProducts(sales);
+  const inventoryTurnover = getInventoryTurnover(sales);
 
   const insight = getAiBusinessInsight({
     monthlyRevenue,
     totalTransactions: sales.length,
     topSellingName: topSellingProducts[0]?.name,
   });
+
+  const hasSalesData = sales.length > 0;
 
   return (
     <DashboardLayout>
@@ -57,48 +54,56 @@ export default async function AnalitikPage() {
           </h1>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Dashboard analytics berbasis transaksi real
-            dan data penjualan aktual.
+            Dashboard analytics berbasis transaksi real dan data penjualan
+            aktual.
           </p>
         </div>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <StatCard
-            title="Monthly Revenue"
-            value={formatCurrency(monthlyRevenue)}
-            description="Total revenue transaksi"
-            icon={CircleDollarSign}
-            tone="emerald"
+        {!hasSalesData ? (
+          <InventoryEmptyState
+            title="Belum ada data analitik"
+            description="Tambahkan transaksi penjualan terlebih dahulu agar FutureStock dapat menampilkan grafik revenue, produk terlaris, inventory turnover, dan insight bisnis."
+            icon={<BarChart3 className="h-10 w-10" />}
+            actionLabel="Tambah Transaksi"
+            actionHref="/transaksi/tambah"
           />
+        ) : (
+          <>
+            <section className="grid gap-4 md:grid-cols-3">
+              <StatCard
+                title="Monthly Revenue"
+                value={formatCurrency(monthlyRevenue)}
+                description="Total revenue transaksi"
+                icon={CircleDollarSign}
+                tone="emerald"
+              />
 
-          <StatCard
-            title="Total Transaksi"
-            value={String(sales.length)}
-            description="Jumlah transaksi tercatat"
-            icon={ReceiptText}
-            tone="cyan"
-          />
+              <StatCard
+                title="Total Transaksi"
+                value={String(sales.length)}
+                description="Jumlah transaksi tercatat"
+                icon={ReceiptText}
+                tone="cyan"
+              />
 
-          <StatCard
-            title="Inventory Turnover"
-            value={String(inventoryTurnover)}
-            description="Total unit terjual"
-            icon={ShoppingBag}
-            tone="violet"
-          />
-        </section>
+              <StatCard
+                title="Inventory Turnover"
+                value={String(inventoryTurnover)}
+                description="Total unit terjual"
+                icon={ShoppingBag}
+                tone="violet"
+              />
+            </section>
 
-        <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-          <SalesRevenueChart
-            data={revenueChartData}
-          />
+            <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+              <SalesRevenueChart data={revenueChartData} />
 
-          <TopSellingProducts
-            products={topSellingProducts}
-          />
-        </section>
+              <TopSellingProducts products={topSellingProducts} />
+            </section>
 
-        <AnalyticsInsight insight={insight} />
+            <AnalyticsInsight insight={insight} />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

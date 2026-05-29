@@ -64,6 +64,10 @@ export function getTopSellingProducts(
 
   sales.forEach((sale) => {
     sale.sales_items.forEach((item) => {
+      if (!item.products) {
+        return;
+      }
+
       const existing = productMap.get(item.product_id);
 
       const quantity = Number(item.quantity);

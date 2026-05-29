@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/services/activity-log-service";
 
 type SaleItemInput = {
   productId: string;
   quantity: number;
+  discountPercentage: number;
 };
 
 async function getCurrentStoreId() {
@@ -39,39 +41,66 @@ async function getCurrentStoreId() {
   };
 }
 
+function clampDiscount(value: number) {
+  if (Number.isNaN(value)) return 0;
+  return Math.min(Math.max(value, 0), 100);
+}
+
 function parseSaleItems(formData: FormData): SaleItemInput[] {
   const productIds = formData
     .getAll("product_id")
-    .map((value) => String(value || "").trim())
-    .filter(Boolean);
+    .map((value) => String(value || "").trim());
 
   const quantities = formData
     .getAll("quantity")
     .map((value) => Number(value || 0));
 
+  const discounts = formData
+    .getAll("discount_percentage")
+    .map((value) => clampDiscount(Number(value || 0)));
+
   return productIds
     .map((productId, index) => ({
       productId,
       quantity: quantities[index] || 0,
+      discountPercentage: discounts[index] || 0,
     }))
     .filter((item) => item.productId && item.quantity > 0);
 }
 
 function mergeDuplicateItems(items: SaleItemInput[]) {
-  const map = new Map<string, number>();
+  const map = new Map<string, SaleItemInput>();
 
   for (const item of items) {
-    map.set(item.productId, (map.get(item.productId) || 0) + item.quantity);
+    const key = `${item.productId}-${item.discountPercentage}`;
+    const existing = map.get(key);
+
+    if (existing) {
+      map.set(key, {
+        ...existing,
+        quantity: existing.quantity + item.quantity,
+      });
+    } else {
+      map.set(key, item);
+    }
   }
 
-  return Array.from(map.entries()).map(([productId, quantity]) => ({
-    productId,
-    quantity,
-  }));
+  return Array.from(map.values());
+}
+
+function revalidateSaleRelatedPaths() {
+  revalidatePath("/transaksi");
+  revalidatePath("/produk");
+  revalidatePath("/dashboard");
+  revalidatePath("/inventaris");
+  revalidatePath("/analitik");
+  revalidatePath("/prediksi-ai");
+  revalidatePath("/dead-stock");
+  revalidatePath("/laporan");
 }
 
 export async function createSaleAction(formData: FormData) {
-  const { supabase, storeId } = await getCurrentStoreId();
+  const { supabase, user, storeId } = await getCurrentStoreId();
 
   const customerName = String(formData.get("customer_name") || "").trim();
   const paymentMethod = String(formData.get("payment_method") || "cash").trim();
@@ -83,7 +112,9 @@ export async function createSaleAction(formData: FormData) {
     throw new Error("Minimal satu produk transaksi wajib diisi.");
   }
 
-  const productIds = saleItems.map((item) => item.productId);
+  const productIds = Array.from(
+    new Set(saleItems.map((item) => item.productId))
+  );
 
   const { data: products, error: productsError } = await supabase
     .from("products")
@@ -101,23 +132,34 @@ export async function createSaleAction(formData: FormData) {
 
   const productMap = new Map(products.map((product) => [product.id, product]));
 
+  const quantityByProduct = new Map<string, number>();
+
   for (const item of saleItems) {
-    const product = productMap.get(item.productId);
+    quantityByProduct.set(
+      item.productId,
+      (quantityByProduct.get(item.productId) || 0) + item.quantity
+    );
+  }
+
+  for (const [productId, quantity] of quantityByProduct.entries()) {
+    const product = productMap.get(productId);
 
     if (!product) {
       throw new Error("Produk tidak ditemukan.");
     }
 
-    if (Number(product.stock) < item.quantity) {
+    if (Number(product.stock) < quantity) {
       throw new Error(`Stok produk ${product.name} tidak mencukupi.`);
     }
   }
 
   const totalAmount = saleItems.reduce((total, item) => {
     const product = productMap.get(item.productId);
-    const price = Number(product?.price || 0);
+    const unitPrice = Number(product?.price || 0);
+    const discountAmount = (unitPrice * item.discountPercentage) / 100;
+    const finalUnitPrice = Math.max(unitPrice - discountAmount, 0);
 
-    return total + price * item.quantity;
+    return total + finalUnitPrice * item.quantity;
   }, 0);
 
   const invoiceNumber = `INV-${Date.now()}`;
@@ -142,13 +184,18 @@ export async function createSaleAction(formData: FormData) {
   const salesItemsPayload = saleItems.map((item) => {
     const product = productMap.get(item.productId);
     const unitPrice = Number(product?.price || 0);
+    const discountAmount = (unitPrice * item.discountPercentage) / 100;
+    const finalUnitPrice = Math.max(unitPrice - discountAmount, 0);
 
     return {
       sale_id: sale.id,
       product_id: item.productId,
       quantity: item.quantity,
       unit_price: unitPrice,
-      subtotal: unitPrice * item.quantity,
+      discount_percentage: item.discountPercentage,
+      discount_amount: discountAmount,
+      final_unit_price: finalUnitPrice,
+      subtotal: finalUnitPrice * item.quantity,
     };
   });
 
@@ -158,22 +205,21 @@ export async function createSaleAction(formData: FormData) {
 
   if (itemError) {
     await supabase.from("sales").delete().eq("id", sale.id);
-
     throw new Error(itemError.message || "Item transaksi gagal dibuat.");
   }
 
-  for (const item of saleItems) {
-    const product = productMap.get(item.productId);
+  for (const [productId, quantity] of quantityByProduct.entries()) {
+    const product = productMap.get(productId);
 
     if (!product) continue;
 
     const { error: stockError } = await supabase
       .from("products")
       .update({
-        stock: Number(product.stock) - item.quantity,
+        stock: Number(product.stock) - quantity,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", item.productId)
+      .eq("id", productId)
       .eq("store_id", storeId);
 
     if (stockError) {
@@ -185,21 +231,31 @@ export async function createSaleAction(formData: FormData) {
     }
   }
 
-  revalidatePath("/transaksi");
-  revalidatePath("/produk");
-  revalidatePath("/dashboard");
-  revalidatePath("/inventaris");
-  revalidatePath("/analitik");
-  revalidatePath("/prediksi-ai");
-  revalidatePath("/dead-stock");
-  revalidatePath("/laporan");
+  await logActivity({
+    storeId,
+    userId: user.id,
+    action: "create",
+    entityType: "sale",
+    entityId: sale.id,
+    title: "Transaksi baru dibuat",
+    description: `Transaksi ${invoiceNumber} berhasil dibuat.`,
+    metadata: {
+      invoice_number: invoiceNumber,
+      customer_name: customerName || "Pelanggan Umum",
+      payment_method: paymentMethod,
+      total_amount: totalAmount,
+      item_count: saleItems.length,
+    },
+  });
 
-  redirect("/transaksi");
+  revalidateSaleRelatedPaths();
+
+  redirect("/transaksi?toast=transaction-created");
 }
 
 export async function deleteSaleWithResultAction(formData: FormData) {
   try {
-    const { supabase, storeId } = await getCurrentStoreId();
+    const { supabase, user, storeId } = await getCurrentStoreId();
 
     const saleId = String(formData.get("sale_id") || "");
 
@@ -212,7 +268,7 @@ export async function deleteSaleWithResultAction(formData: FormData) {
 
     const { data: sale, error: saleError } = await supabase
       .from("sales")
-      .select("id, store_id")
+      .select("id, store_id, invoice_number, total_amount")
       .eq("id", saleId)
       .eq("store_id", storeId)
       .single();
@@ -237,12 +293,21 @@ export async function deleteSaleWithResultAction(formData: FormData) {
       };
     }
 
-    revalidatePath("/transaksi");
-    revalidatePath("/dashboard");
-    revalidatePath("/analitik");
-    revalidatePath("/prediksi-ai");
-    revalidatePath("/dead-stock");
-    revalidatePath("/laporan");
+    await logActivity({
+      storeId,
+      userId: user.id,
+      action: "delete",
+      entityType: "sale",
+      entityId: sale.id,
+      title: "Transaksi dihapus",
+      description: `Transaksi ${sale.invoice_number} berhasil dihapus.`,
+      metadata: {
+        invoice_number: sale.invoice_number,
+        total_amount: sale.total_amount,
+      },
+    });
+
+    revalidateSaleRelatedPaths();
 
     return {
       success: true,

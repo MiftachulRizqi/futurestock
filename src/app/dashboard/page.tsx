@@ -8,24 +8,31 @@ import {
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { StatCard } from "@/components/dashboard/stat-card";
+
 import { ActualVsPredictionChart } from "@/components/dashboard/actual-vs-prediction-chart";
 import { StockNotifications } from "@/components/dashboard/stock-notifications";
 import { InventoryValueChart } from "@/components/dashboard/inventory-value-chart";
 import { CategoryStockChart } from "@/components/dashboard/category-stock-chart";
 import { AiForecastPanel } from "@/components/dashboard/ai-forecast-panel";
+import { BusinessSummary } from "@/components/dashboard/business-summary";
 import { LowStockAlert } from "@/components/dashboard/low-stock-alert";
 import { InventoryHealth } from "@/components/dashboard/inventory-health";
 import { RecentProducts } from "@/components/dashboard/recent-products";
 import { EcoImpactIndicator } from "@/components/dashboard/eco-impact-indicator";
+import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 
 import { getProducts } from "@/services/product-service";
 import { getSales } from "@/services/sales-service";
+import { getRecentActivityLogs } from "@/services/activity-log-service";
+
 import { getDashboardMetrics } from "@/lib/helpers/dashboard-metrics";
 import { getAutomaticStockNotifications } from "@/lib/helpers/stock-notifications";
+
 import {
   getCategoryStockChartData,
   getInventoryValueChartData,
 } from "@/lib/helpers/chart-data";
+
 import {
   getActualVsPredictionChartData,
   getLatestPredictionTotal,
@@ -34,18 +41,22 @@ import {
 export default async function DashboardPage() {
   const products = await getProducts();
   const sales = await getSales();
+  const recentActivities = await getRecentActivityLogs(5);
 
   const metrics = getDashboardMetrics(products);
   const categoryStockData = getCategoryStockChartData(products);
   const inventoryValueData = getInventoryValueChartData(products);
   const forecastChartData = getActualVsPredictionChartData(products, sales);
   const stockNotifications = getAutomaticStockNotifications(products, sales);
+
   const almostEmptyProducts = products.filter((product) => {
     return Number(product.stock) > 0 && Number(product.stock) <= 5;
   });
+
   const emptyProducts = products.filter((product) => {
     return Number(product.stock) <= 0;
   });
+
   const weeklyPrediction = getLatestPredictionTotal(forecastChartData.weekly);
 
   return (
@@ -89,16 +100,27 @@ export default async function DashboardPage() {
 
         <section className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
           <ActualVsPredictionChart data={forecastChartData} />
+
           <StockNotifications notifications={stockNotifications} />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
           <InventoryValueChart data={inventoryValueData} />
+
           <CategoryStockChart data={categoryStockData} />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
           <AiForecastPanel products={products} />
+
+          <BusinessSummary
+            inventoryHealth={metrics.inventoryHealth}
+            inventoryValue={metrics.inventoryValue}
+            totalProducts={metrics.totalProducts}
+            healthyProducts={metrics.healthyProducts.length}
+            lowStockProducts={metrics.lowStockProducts.length}
+          />
+
           <LowStockAlert products={products} />
 
           <InventoryHealth
@@ -113,6 +135,8 @@ export default async function DashboardPage() {
             lowStockCount={metrics.lowStockProducts.length}
           />
         </section>
+
+        <ActivityTimeline activities={recentActivities} />
 
         <RecentProducts products={products} />
       </div>

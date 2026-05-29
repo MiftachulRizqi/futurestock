@@ -20,6 +20,16 @@ type SalesSummaryItem = {
   last_sold_at: string | null;
 };
 
+export type AiForecastSource = "cache" | "gemini" | "fallback" | "stale-cache";
+
+export type AiForecastWithMeta = {
+  forecast: AiForecastResult;
+  source: AiForecastSource;
+  generatedAt: string | null;
+  cacheAgeHours: number | null;
+  isFreshCache: boolean;
+};
+
 function createFallbackForecast(
   salesSummary: SalesSummaryItem[]
 ): AiForecastResult {
@@ -36,11 +46,17 @@ function createFallbackForecast(
       secondary_product_id: undefined,
       secondary_product_name: undefined,
       promo_type: "discount" as const,
-      promo_description: `Diskon ${Math.floor(Math.random() * 20) + 10}% untuk ${item.name}`,
+      promo_description: `Diskon ${
+        Math.floor(Math.random() * 20) + 10
+      }% untuk ${item.name}`,
       suggested_price: Math.floor(item.price * 0.8),
       discount_percentage: Math.floor(Math.random() * 20) + 10,
-      urgency_level: (item.current_stock > item.min_stock * 10 ? "high" : "medium") as "high" | "medium" | "low",
-      estimated_clearance_days: Math.ceil(item.current_stock / Math.max(item.average_daily_sales_30d, 1)),
+      urgency_level: (item.current_stock > item.min_stock * 10
+        ? "high"
+        : "medium") as "high" | "medium" | "low",
+      estimated_clearance_days: Math.ceil(
+        item.current_stock / Math.max(item.average_daily_sales_30d, 1)
+      ),
     }));
 
   const restockItems = salesSummary
@@ -60,7 +76,8 @@ function createFallbackForecast(
       ),
       overstock_warning: false,
       dead_stock_risk: "low" as const,
-      sales_potential: item.sold_last_7_days > 0 ? ("medium" as const) : ("low" as const),
+      sales_potential:
+        item.sold_last_7_days > 0 ? ("medium" as const) : ("low" as const),
       confidence_score: 55,
       holiday_affected: false,
       reason: "Analisis fallback berbasis data transaksi lokal tanpa API AI.",
@@ -87,7 +104,7 @@ function createFallbackForecast(
       sales_potential: "low" as const,
       confidence_score: 50,
       holiday_affected: false,
-      promo_recommendation: `Diskon 15-20% untuk menghabiskan stok berlebih.`,
+      promo_recommendation: "Diskon 15-20% untuk menghabiskan stok berlebih.",
       promo_type: "discount" as const,
       reason: "Stok jauh lebih tinggi dari minimum.",
     }));
@@ -138,7 +155,8 @@ function createFallbackForecast(
   }));
 
   return {
-    summary: "Sistem menampilkan analisis fallback berbasis data transaksi lokal karena API sedang tidak tersedia.",
+    summary:
+      "Sistem menampilkan analisis fallback berbasis data transaksi lokal karena API sedang tidak tersedia.",
     holiday_context: {
       has_upcoming_holiday: false,
       upcoming_holiday: null,
@@ -156,26 +174,32 @@ function createFallbackForecast(
   };
 }
 
-export async function getSmartAiForecast(params: {
+export async function getSmartAiForecastWithMeta(params: {
   salesSummary: SalesSummaryItem[];
   totalProducts: number;
   totalTransactions: number;
-}): Promise<AiForecastResult> {
+  forceRefresh?: boolean;
+}): Promise<AiForecastWithMeta> {
   const latest = await getLatestAiForecast();
 
-  if (latest) {
-    const ageInHours = differenceInHours(
-      new Date(),
-      new Date(latest.generated_at)
-    );
+  const cacheAgeHours = latest
+    ? differenceInHours(new Date(), new Date(latest.generated_at))
+    : null;
 
-    const stillFresh =
-      ageInHours < 6 &&
-      latest.total_transactions === params.totalTransactions;
+  const isFreshCache =
+    Boolean(latest) &&
+    cacheAgeHours !== null &&
+    cacheAgeHours < 6 &&
+    latest?.total_transactions === params.totalTransactions;
 
-    if (stillFresh) {
-      return latest.forecast_data;
-    }
+  if (latest && isFreshCache && !params.forceRefresh) {
+    return {
+      forecast: latest.forecast_data,
+      source: "cache",
+      generatedAt: latest.generated_at,
+      cacheAgeHours,
+      isFreshCache: true,
+    };
   }
 
   try {
@@ -188,12 +212,40 @@ export async function getSmartAiForecast(params: {
       totalTransactions: params.totalTransactions,
     });
 
-    return forecast;
+    return {
+      forecast,
+      source: "gemini",
+      generatedAt: new Date().toISOString(),
+      cacheAgeHours: 0,
+      isFreshCache: false,
+    };
   } catch {
     if (latest) {
-      return latest.forecast_data;
+      return {
+        forecast: latest.forecast_data,
+        source: "stale-cache",
+        generatedAt: latest.generated_at,
+        cacheAgeHours,
+        isFreshCache: false,
+      };
     }
 
-    return createFallbackForecast(params.salesSummary);
+    return {
+      forecast: createFallbackForecast(params.salesSummary),
+      source: "fallback",
+      generatedAt: null,
+      cacheAgeHours: null,
+      isFreshCache: false,
+    };
   }
+}
+
+export async function getSmartAiForecast(params: {
+  salesSummary: SalesSummaryItem[];
+  totalProducts: number;
+  totalTransactions: number;
+}): Promise<AiForecastResult> {
+  const result = await getSmartAiForecastWithMeta(params);
+
+  return result.forecast;
 }

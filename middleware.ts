@@ -10,6 +10,7 @@ const protectedRoutes = [
   "/prediksi-ai",
   "/dead-stock",
   "/laporan",
+  "/aktivitas",
   "/pengaturan",
 ];
 

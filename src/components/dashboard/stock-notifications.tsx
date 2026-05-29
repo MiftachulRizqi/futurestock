@@ -193,6 +193,8 @@ export function StockNotifications({
     [dismissedIds, liveNotifications]
   );
 
+  const dashboardNotifications = visibleNotifications.slice(0, 5);
+
   function dismissNotification(id: string) {
     setDismissedIds((currentIds) => {
       const nextIds = new Set(currentIds);
@@ -270,11 +272,21 @@ export function StockNotifications({
         </div>
 
         <div className="mt-5 space-y-3">
+         {visibleNotifications.length > 5 ? (
+            <div className="mt-4 border-t border-border pt-4">
+              <Link
+                href="/inventaris"
+                className="inline-flex text-sm font-medium text-primary"
+              >
+                Lihat semua notifikasi stok
+              </Link>
+            </div>
+          ) : null}
           {visibleNotifications.length === 0 ? (
             <StockNotificationsEmptyState />
           ) : (
             <AnimatePresence initial={false}>
-              {visibleNotifications.map((notification) => (
+              {dashboardNotifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
                   notification={notification}

@@ -5,6 +5,7 @@ import { getProducts } from "@/services/product-service";
 import GlobalProvider from "@/components/providers/global-provider";
 import { ToastProvider } from "@/components/feedback/toast";
 import { GlobalLoadingOverlay } from "@/components/feedback/global-loading-overlay";
+import { ToastUrlListener } from "@/components/feedback/toast-url-listener";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +31,14 @@ export default async function RootLayout({
 
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <GlobalProvider products={products}>
           {children}
           <ToastProvider />
+          <ToastUrlListener />
           <GlobalLoadingOverlay />
         </GlobalProvider>
       </body>

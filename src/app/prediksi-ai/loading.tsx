@@ -1,5 +1,5 @@
-import { PredictionPageSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { AiForecastLoading } from "@/components/ai/ai-forecast-loading";
 
-export default function PrediksiAILoading() {
-  return <PredictionPageSkeleton />;
+export default function PrediksiAiLoading() {
+  return <AiForecastLoading />;
 }
