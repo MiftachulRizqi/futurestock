@@ -2,12 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Pencil } from "lucide-react";
+import {
+  Eye,
+  PackageSearch,
+  Pencil,
+  Plus,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type { Product } from "@/types/product";
 
 import { formatCurrency } from "@/lib/helpers/format";
+import { DataTable } from "@/components/data/data-table";
+import { Button } from "@/components/ui/button";
 
 import { DeleteProductButton } from "./delete-product-button";
 
@@ -15,203 +24,258 @@ type ProductTableProps = {
   products: Product[];
 };
 
-export function ProductTable({
-  products,
-}: ProductTableProps) {
+export function ProductTable({ products }: ProductTableProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
 
+  const categories = useMemo(() => {
+    return Array.from(new Set(products.map((product) => product.category)))
+      .filter(Boolean)
+      .sort();
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const matchSearch = product.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const keyword = search.toLowerCase();
+
+      const matchSearch =
+        product.name.toLowerCase().includes(keyword) ||
+        product.sku.toLowerCase().includes(keyword) ||
+        product.category.toLowerCase().includes(keyword) ||
+        (product.supplier || "").toLowerCase().includes(keyword);
 
       const matchCategory =
-        category === "all" ||
-        product.category === category;
+        category === "all" || product.category === category;
 
       return matchSearch && matchCategory;
     });
   }, [products, search, category]);
 
-  const categories = Array.from(
-    new Set(products.map((product) => product.category))
-  );
-
-  if (products.length === 0) {
-    return (
-      <div className="rounded-2xl border border-border bg-card/70 p-8 text-center">
-        <h2 className="text-lg font-semibold text-foreground">
-          Belum ada produk
-        </h2>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          Tambahkan produk pertama untuk mulai mengelola inventaris.
-        </p>
-
-        <Link
-          href="/produk/tambah"
-          className="mt-5 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Tambah Produk
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      {/* Search & Filter */}
-      <div className="flex flex-col gap-4 md:flex-row">
-        <input
-          type="text"
-          placeholder="Cari produk..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-border bg-card px-4 py-2 text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
-        />
+    <div className="space-y-5">
+      <div className="rounded-3xl border border-border bg-card/80 p-4 shadow-sm">
+        <div className="flex flex-col gap-3 md:flex-row">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="rounded-xl border border-border bg-card px-4 py-2 text-foreground outline-none focus:border-primary"
-        >
-          <option value="all">Semua Kategori</option>
+            <input
+              type="text"
+              placeholder="Cari nama produk, SKU, kategori, atau supplier..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-12 w-full rounded-2xl border border-border bg-background px-4 pl-11 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary/40 focus:ring-4 focus:ring-primary/10"
+            />
+          </div>
 
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          <div className="relative md:w-64">
+            <SlidersHorizontal className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              className="h-12 w-full appearance-none rounded-2xl border border-border bg-background px-4 pl-11 text-sm text-foreground outline-none transition focus:border-primary/40 focus:ring-4 focus:ring-primary/10"
+            >
+              <option value="all">Semua Kategori</option>
+
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+          <p>
+            Menampilkan{" "}
+            <span className="font-semibold text-foreground">
+              {filteredProducts.length}
+            </span>{" "}
+            dari{" "}
+            <span className="font-semibold text-foreground">
+              {products.length}
+            </span>{" "}
+            produk.
+          </p>
+
+          {(search || category !== "all") && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setCategory("all");
+              }}
+              className="font-semibold text-primary transition hover:text-primary/80"
+            >
+              Reset filter
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-border bg-card/70">
-        <table className="w-full min-w-[980px] text-sm">
-          <thead className="bg-card/5 text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 text-left">
-                Produk
-              </th>
-
-              <th className="px-4 py-3 text-left">
-                SKU
-              </th>
-
-              <th className="px-4 py-3 text-left">
-                Kategori
-              </th>
-
-              <th className="px-4 py-3 text-left">
-                Stok
-              </th>
-
-              <th className="px-4 py-3 text-left">
-                Harga
-              </th>
-
-              <th className="px-4 py-3 text-left">
-                Status
-              </th>
-
-              <th className="px-4 py-3 text-right">
-                Aksi
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredProducts.map((product) => (
-              <tr
-                key={product.id}
-                className="border-t border-border transition hover:bg-card/[0.03]"
-              >
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-border bg-card/5">
-                      {product.image_url ? (
-                        <Image
-                          src={product.image_url.trim()}
-                          alt={product.name}
-                          width={48}
-                          height={48}
-                          unoptimized
-                          className="h-12 w-12 object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">
-                          IMG
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-foreground">
-                        {product.name}
-                      </p>
-
-                      <p className="truncate text-xs text-muted-foreground">
-                        {product.supplier ||
-                          "Tanpa supplier"}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="px-4 py-3 text-muted-foreground">
-                  {product.sku}
-                </td>
-
-                <td className="px-4 py-3 text-muted-foreground">
-                  {product.category}
-                </td>
-
-                <td className="px-4 py-3 text-muted-foreground">
-                  {product.stock} {product.unit}
-                </td>
-
-                <td className="px-4 py-3 text-muted-foreground">
-                  {formatCurrency(Number(product.price))}
-                </td>
-
-                <td className="px-4 py-3">
-                  <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
-                    {product.status === "active"
-                      ? "Aktif"
-                      : "Nonaktif"}
-                  </span>
-                </td>
-
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2">
-                    <Link
-                      href={`/produk/${product.id}`}
-                      className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
-                    >
-                      <Eye className="mr-1 h-4 w-4" />
-                      Detail
-                    </Link>
-
-                    <Link
-                      href={`/produk/${product.id}/edit`}
-                      className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                    >
-                      <Pencil className="mr-1 h-4 w-4" />
-                      Edit
-                    </Link>
-
-                    <DeleteProductButton
-                      productId={product.id}
+      <DataTable<Product>
+        data={filteredProducts}
+        getRowKey={(product) => product.id}
+        emptyTitle={
+          products.length === 0
+            ? "Belum ada produk"
+            : "Produk tidak ditemukan"
+        }
+        emptyDescription={
+          products.length === 0
+            ? "Tambahkan produk pertama untuk mulai mengelola inventaris, stok, transaksi, dan prediksi AI."
+            : "Tidak ada produk yang sesuai dengan pencarian atau filter kategori saat ini."
+        }
+        emptyAction={
+          products.length === 0 ? (
+            <Button asChild>
+              <Link href="/produk/tambah">
+                <Plus className="mr-2 h-4 w-4" />
+                Tambah Produk
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setSearch("");
+                setCategory("all");
+              }}
+            >
+              <PackageSearch className="mr-2 h-4 w-4" />
+              Reset Filter
+            </Button>
+          )
+        }
+        columns={[
+          {
+            key: "name",
+            header: "Produk",
+            render: (product) => (
+              <div className="flex items-center gap-3">
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted">
+                  {product.image_url ? (
+                    <Image
+                      src={product.image_url.trim()}
+                      alt={product.name}
+                      width={48}
+                      height={48}
+                      unoptimized
+                      className="h-12 w-12 object-cover"
                     />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-muted-foreground">
+                      IMG
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-foreground">
+                    {product.name}
+                  </p>
+
+                  <p className="truncate text-xs text-muted-foreground">
+                    {product.supplier || "Tanpa supplier"}
+                  </p>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "sku",
+            header: "SKU",
+            render: (product) => (
+              <span className="font-medium text-muted-foreground">
+                {product.sku}
+              </span>
+            ),
+          },
+          {
+            key: "category",
+            header: "Kategori",
+            render: (product) => (
+              <span className="rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                {product.category}
+              </span>
+            ),
+          },
+          {
+            key: "stock",
+            header: "Stok",
+            render: (product) => {
+              const isLowStock = product.stock <= product.min_stock;
+
+              return (
+                <div>
+                  <p
+                    className={
+                      isLowStock
+                        ? "font-semibold text-red-600"
+                        : "font-semibold text-foreground"
+                    }
+                  >
+                    {product.stock} {product.unit}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Min. {product.min_stock} {product.unit}
+                  </p>
+                </div>
+              );
+            },
+          },
+          {
+            key: "price",
+            header: "Harga",
+            render: (product) => (
+              <span className="font-semibold text-foreground">
+                {formatCurrency(Number(product.price))}
+              </span>
+            ),
+          },
+          {
+            key: "status",
+            header: "Status",
+            render: (product) => (
+              <span
+                className={
+                  product.status === "active"
+                    ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                    : "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600"
+                }
+              >
+                {product.status === "active" ? "Aktif" : "Nonaktif"}
+              </span>
+            ),
+          },
+          {
+            key: "actions",
+            header: "Aksi",
+            className: "text-right",
+            render: (product) => (
+              <div className="flex justify-end gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/produk/${product.id}`}>
+                    <Eye className="mr-1 h-4 w-4" />
+                    Detail
+                  </Link>
+                </Button>
+
+                <Button asChild size="sm">
+                  <Link href={`/produk/${product.id}/edit`}>
+                    <Pencil className="mr-1 h-4 w-4" />
+                    Edit
+                  </Link>
+                </Button>
+
+                <DeleteProductButton productId={product.id} />
+              </div>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
