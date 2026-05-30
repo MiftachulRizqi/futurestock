@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import { dashboardNavigation } from "@/lib/constants/navigation";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ export function AppHeader({
   const hasSearchResult =
     filteredMenus.length > 0 || filteredProducts.length > 0;
 
-  // Fetch notifications when bell is clicked
+  // Fetch notifications when component mounts
   const fetchNotifications = async () => {
     try {
       const response = await fetch('/api/notifications');
@@ -91,10 +91,11 @@ export function AppHeader({
     }
   };
 
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
   const handleNotificationClick = () => {
-    if (!notificationOpen && notifications.length === 0) {
-      fetchNotifications();
-    }
     setNotificationOpen(!notificationOpen);
   };
 
