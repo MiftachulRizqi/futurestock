@@ -1,29 +1,18 @@
+"use client";
+
 import { Bell, Building2, Shield, User } from "lucide-react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GlassPanel } from "@/components/shared/glass-panel";
-import { getCurrentProfile } from "@/services/profile-service";
-import { getCurrentStore } from "@/services/store-service";
+import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/app/login/actions";
 
-export default async function PengaturanPage() {
-  const currentProfile = await getCurrentProfile();
-  const currentStore = await getCurrentStore();
-
-  const userName =
-    currentProfile?.profile?.full_name ||
-    currentProfile?.user?.email ||
-    "User";
-
-  const email = currentProfile?.profile?.email || currentProfile?.user?.email;
-  const store = currentStore?.store;
-  const role = currentStore?.role ?? "owner";
+export default function PengaturanPage() {
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
-    <DashboardLayout
-      userName={userName}
-      storeName={store?.name ?? "FutureStock Store"}
-      role={role}
-    >
+    <DashboardLayout>
       <div className="space-y-6">
         <GlassPanel className="p-6">
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
@@ -43,25 +32,24 @@ export default async function PengaturanPage() {
               </div>
 
               <div>
-                <p className="text-lg font-semibold text-foreground">{userName}</p>
-                <p className="text-sm text-muted-foreground">{email}</p>
+                <p className="text-lg font-semibold text-foreground">User</p>
+                <p className="text-sm text-muted-foreground">user@example.com</p>
               </div>
             </div>
 
             <div className="mt-6 space-y-3">
-              <InfoItem label="Role" value={role} />
-              <InfoItem label="Store ID" value={store?.id ?? "-"} />
-              <InfoItem label="User ID" value={currentProfile?.user?.id ?? "-"} />
+              <InfoItem label="Role" value="owner" />
+              <InfoItem label="Store ID" value="store-123" />
+              <InfoItem label="User ID" value="user-123" />
             </div>
 
-            <form action={logoutAction} className="mt-6">
-              <button
-                type="submit"
-                className="h-11 w-full rounded-xl border border-destructive/20 bg-destructive/10 font-semibold text-destructive transition hover:bg-destructive/20"
-              >
-                Logout
-              </button>
-            </form>
+            <button
+              type="button"
+              onClick={() => setLogoutOpen(true)}
+              className="mt-6 h-11 w-full rounded-xl border border-destructive/20 bg-destructive/10 font-semibold text-destructive transition hover:bg-destructive/20"
+            >
+              Logout
+            </button>
           </GlassPanel>
 
           <GlassPanel className="p-5">
@@ -72,28 +60,20 @@ export default async function PengaturanPage() {
 
               <div>
                 <p className="text-lg font-semibold text-foreground">
-                  {store?.name ?? "FutureStock Store"}
+                  FutureStock Store
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {store?.business_type ?? "UMKM Retail"} ·{" "}
-                  {store?.country ?? "Indonesia"}
+                  UMKM Retail · Indonesia
                 </p>
               </div>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <InfoItem label="Nama Toko" value={store?.name ?? "-"} />
-              <InfoItem
-                label="Jenis Usaha"
-                value={store?.business_type ?? "-"}
-              />
-              <InfoItem label="Kota" value={store?.city ?? "-"} />
-              <InfoItem label="Negara" value={store?.country ?? "-"} />
-              <InfoItem
-                label="Alamat"
-                value={store?.address ?? "-"}
-                className="md:col-span-2"
-              />
+              <InfoItem label="Nama Toko" value="FutureStock Store" />
+              <InfoItem label="Jenis Usaha" value="UMKM Retail" />
+              <InfoItem label="Kota" value="Jakarta" />
+              <InfoItem label="Negara" value="Indonesia" />
+              <InfoItem label="Alamat" value="Jl. Contoh No. 123" className="md:col-span-2" />
             </div>
           </GlassPanel>
         </section>
@@ -104,6 +84,32 @@ export default async function PengaturanPage() {
           <SettingsCard icon={Shield} title="Keamanan" />
         </section>
       </div>
+
+      {logoutOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-foreground">Konfirmasi Logout</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Apakah Anda yakin ingin keluar dari akun?
+              </p>
+              <div className="mt-4 flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setLogoutOpen(false)}
+                >
+                  Batal
+                </Button>
+                <form action={logoutAction}>
+                  <Button type="submit" variant="destructive" className="bg-destructive text-white hover:bg-destructive/90">
+                    Ya, Keluar
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </DashboardLayout>
   );
 }
@@ -137,7 +143,7 @@ function SettingsCard({
   return (
     <button
       type="button"
-      className="flex items-center gap-3 rounded-2xl border border-border bg-card/[0.06] p-4 text-left text-sm text-muted-foreground transition hover:bg-card/10 hover:text-foreground"
+      className="flex items-center gap-3 rounded-2xl border border-border bg-card/0.06 p-4 text-left text-sm text-muted-foreground transition hover:bg-card/10 hover:text-foreground"
     >
       <Icon className="h-5 w-5 text-primary" />
       {title}

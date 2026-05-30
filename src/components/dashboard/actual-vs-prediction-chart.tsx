@@ -295,11 +295,11 @@ export function ActualVsPredictionChart({
                   type="linear"
                   dataKey="prediction"
                   name="Prediksi"
-                  stroke="var(--primary)"
+                  stroke="oklch(0.65 0.18 145)"
                   strokeWidth={3}
                   strokeDasharray="7 7"
                   dot={{ r: 3, strokeWidth: 2, fill: "var(--card)" }}
-                  activeDot={{ r: 6, strokeWidth: 0, fill: "var(--primary)" }}
+                  activeDot={{ r: 6, strokeWidth: 0, fill: "oklch(0.65 0.18 145)" }}
                   isAnimationActive
                   animationDuration={900}
                 />

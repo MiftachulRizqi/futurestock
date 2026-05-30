@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Product } from "@/types/product";
 
 import { Button } from "@/components/ui/button";
@@ -184,7 +185,16 @@ export function ProductForm({
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <Link href="/produk">
+          <Button
+            type="button"
+            variant="destructive"
+            className="bg-destructive text-white hover:bg-destructive/90"
+          >
+            Batal
+          </Button>
+        </Link>
         <Button type="submit">{submitLabel}</Button>
       </div>
     </form>

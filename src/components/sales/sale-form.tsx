@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Plus, Sparkles, Trash2 } from "lucide-react";
 import type { Product } from "@/types/product";
 import { formatCurrency } from "@/lib/helpers/format";
+import { Button } from "@/components/ui/button";
 
 type SaleFormProps = {
   products: Product[];
@@ -344,12 +346,23 @@ export function SaleForm({
           ) : null}
         </div>
 
-        <button
-          type="submit"
-          className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-        >
-          Simpan Transaksi
-        </button>
+        <div className="flex gap-3">
+          <Link href="/transaksi">
+            <Button
+              type="button"
+              variant="destructive"
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Batal
+            </Button>
+          </Link>
+          <button
+            type="submit"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+          >
+            Simpan Transaksi
+          </button>
+        </div>
       </div>
     </form>
   );

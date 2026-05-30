@@ -316,7 +316,7 @@ function ForecastAccuracyCard({
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border bg-card/40 p-5 text-center md:min-w-[190px]">
+        <div className="rounded-3xl border border-border bg-card/40 p-5 text-center md:min-w-47.5">
           <p className="text-sm text-muted-foreground">Status</p>
 
           {isInsufficient ? (
@@ -513,7 +513,7 @@ function ForecastSection({
                       </span>
                     </td>
 
-                    <td className="max-w-[250px] whitespace-normal px-4 py-3 text-xs text-muted-foreground">
+                    <td className="max-w-62.5 whitespace-normal px-4 py-3 text-xs text-muted-foreground">
                       <div className="space-y-1">
                         {item.holiday_affected && (
                           <div className="flex items-center gap-1 font-medium text-primary">

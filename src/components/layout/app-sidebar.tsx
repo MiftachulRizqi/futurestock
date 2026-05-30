@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Sparkles, ShoppingBasket } from "lucide-react";
+import { ShoppingBasket } from "lucide-react";
 import { dashboardNavigation } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
 
@@ -67,18 +67,6 @@ export function AppSidebar() {
           );
         })}
       </nav>
-
-      <div className="rounded-3xl border border-primary/20 bg-primary/10 p-4">
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/20">
-          <Sparkles className="h-5 w-5 text-primary" />
-        </div>
-
-        <p className="text-sm font-semibold text-foreground">AI Forecast Ready</p>
-
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-          Optimalkan stok toko dengan prediksi permintaan berbasis AI.
-        </p>
-      </div>
     </motion.aside>
   );
 }

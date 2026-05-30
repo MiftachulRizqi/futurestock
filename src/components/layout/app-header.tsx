@@ -2,29 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
 import {
   Bell,
   LogOut,
   Menu,
   Search,
-  Sparkles,
   Package,
   ChevronRight,
+  X,
 } from "lucide-react";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { dashboardNavigation } from "@/lib/constants/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logoutAction } from "@/app/login/actions";
 import { useSearchStore } from "@/store/search-store";
+import { StockNotificationsDropdown } from "@/components/dashboard/stock-notifications-dropdown";
 
 export function AppHeader({
   onMenuClick,
   userName = "Owner Toko",
 }: any) {
   const pathname = usePathname();
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const { query, setQuery, products } = useSearchStore();
 
@@ -72,6 +77,26 @@ export function AppHeader({
 
   const hasSearchResult =
     filteredMenus.length > 0 || filteredProducts.length > 0;
+
+  // Fetch notifications when bell is clicked
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const stockNotifications = await response.json();
+        setNotifications(stockNotifications);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  };
+
+  const handleNotificationClick = () => {
+    if (!notificationOpen && notifications.length === 0) {
+      fetchNotifications();
+    }
+    setNotificationOpen(!notificationOpen);
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/70 backdrop-blur-xl">
@@ -155,17 +180,19 @@ export function AppHeader({
           ) : null}
         </div>
 
-        <Link
-          href="/prediksi-ai"
-          className="hidden h-10 items-center rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground md:inline-flex"
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Tanya AI
-        </Link>
-
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="relative" onClick={handleNotificationClick}>
           <Bell className="h-5 w-5" />
+          {notifications.length > 0 && (
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
+          )}
         </Button>
+
+        {notificationOpen && (
+          <StockNotificationsDropdown
+            notifications={notifications}
+            onClose={() => setNotificationOpen(false)}
+          />
+        )}
 
         <Link href="/pengaturan">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
@@ -175,13 +202,40 @@ export function AppHeader({
 
         <form action={logoutAction}>
           <button
-            type="submit"
+            type="button"
+            onClick={() => setLogoutOpen(true)}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-destructive transition hover:bg-destructive/10"
             aria-label="Logout"
           >
             <LogOut className="h-5 w-5" />
           </button>
         </form>
+
+        {logoutOpen &&
+          createPortal(
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-2xl">
+                <h3 className="text-lg font-bold text-foreground">Konfirmasi Logout</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Apakah Anda yakin ingin keluar dari akun?
+                </p>
+                <div className="mt-4 flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setLogoutOpen(false)}
+                  >
+                    Batal
+                  </Button>
+                  <form action={logoutAction}>
+                    <Button type="submit" variant="destructive" className="bg-destructive text-white hover:bg-destructive/90">
+                      Ya, Keluar
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
       </div>
     </header>
   );

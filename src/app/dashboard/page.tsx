@@ -98,10 +98,8 @@ export default async function DashboardPage() {
           />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
+        <section className="grid gap-6">
           <ActualVsPredictionChart data={forecastChartData} />
-
-          <StockNotifications notifications={stockNotifications} />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
@@ -110,9 +108,7 @@ export default async function DashboardPage() {
           <CategoryStockChart data={categoryStockData} />
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-2">
-          <AiForecastPanel products={products} />
-
+        <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
           <BusinessSummary
             inventoryHealth={metrics.inventoryHealth}
             inventoryValue={metrics.inventoryValue}
@@ -121,15 +117,21 @@ export default async function DashboardPage() {
             lowStockProducts={metrics.lowStockProducts.length}
           />
 
-          <LowStockAlert products={products} />
-
           <InventoryHealth
             value={metrics.inventoryHealth}
             totalProducts={metrics.totalProducts}
             lowStockCount={metrics.lowStockProducts.length}
             inactiveCount={metrics.inactiveProducts.length}
           />
+        </section>
 
+        <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+          <AiForecastPanel products={products} />
+
+          <LowStockAlert products={products} />
+        </section>
+
+        <section className="grid gap-6">
           <EcoImpactIndicator
             totalProducts={metrics.totalProducts}
             lowStockCount={metrics.lowStockProducts.length}
