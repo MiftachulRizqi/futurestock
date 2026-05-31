@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Building2, Shield, User } from "lucide-react";
+import { Building2, User } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
@@ -77,12 +77,6 @@ export default function PengaturanPage() {
             </div>
           </GlassPanel>
         </section>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          <SettingsCard icon={User} title="Profil Pengguna" />
-          <SettingsCard icon={Bell} title="Notifikasi" />
-          <SettingsCard icon={Shield} title="Keamanan" />
-        </section>
       </div>
 
       {logoutOpen &&
@@ -130,23 +124,5 @@ function InfoItem({
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-2 break-all text-sm font-medium text-foreground">{value}</p>
     </div>
-  );
-}
-
-function SettingsCard({
-  icon: Icon,
-  title,
-}: {
-  icon: typeof User;
-  title: string;
-}) {
-  return (
-    <button
-      type="button"
-      className="flex items-center gap-3 rounded-2xl border border-border bg-card/0.06 p-4 text-left text-sm text-muted-foreground transition hover:bg-card/10 hover:text-foreground"
-    >
-      <Icon className="h-5 w-5 text-primary" />
-      {title}
-    </button>
   );
 }

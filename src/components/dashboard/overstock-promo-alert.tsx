@@ -66,11 +66,11 @@ function PromoBundleCard({ bundle }: { bundle: PromoBundle }) {
   const getUrgencyColor = () => {
     switch (bundle.urgency_level) {
       case "high":
-        return "bg-red-400/20 text-red-300 border-red-400/30";
+        return "bg-red-500/10 text-red-500 border-red-400/30";
       case "medium":
-        return "bg-amber-400/20 text-amber-300 border-amber-400/30";
+        return "bg-amber-500/10 text-amber-500 border-amber-400/30";
       case "low":
-        return "bg-emerald-400/20 text-emerald-300 border-emerald-400/30";
+        return "bg-emerald-500/10 text-emerald-500 border-emerald-400/30";
       default:
         return "bg-slate-400/20 text-slate-300 border-slate-400/30";
     }

@@ -258,15 +258,17 @@ export function ProductTable({ products }: ProductTableProps) {
             key: "status",
             header: "Status",
             render: (product) => (
-              <span
-                className={
-                  product.status === "active"
-                    ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-                    : "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600"
-                }
-              >
-                {product.status === "active" ? "Aktif" : "Nonaktif"}
-              </span>
+              <div className="flex justify-center">
+                <span
+                  className={
+                    product.status === "active"
+                      ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                      : "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600"
+                  }
+                >
+                  {product.status === "active" ? "Aktif" : "Nonaktif"}
+                </span>
+              </div>
             ),
           },
           {

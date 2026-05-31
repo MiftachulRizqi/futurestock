@@ -346,7 +346,7 @@ export function SaleForm({
           ) : null}
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex justify-end gap-3">
           <Link href="/transaksi">
             <Button
               type="button"
@@ -356,12 +356,12 @@ export function SaleForm({
               Batal
             </Button>
           </Link>
-          <button
+          <Button
             type="submit"
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             Simpan Transaksi
-          </button>
+          </Button>
         </div>
       </div>
     </form>

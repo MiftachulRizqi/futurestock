@@ -195,7 +195,7 @@ export default function LoginRegisterClient({
                         type="button"
                         onClick={() => setShowLoginPassword((prev) => !prev)}
                         disabled={isPending}
-                        className="text-[#8A948D] transition hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex items-center justify-center text-[#8A948D] transition hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                         aria-label={
                           showLoginPassword
                             ? "Sembunyikan password"
@@ -295,7 +295,7 @@ export default function LoginRegisterClient({
                           setShowRegisterPassword((prev) => !prev)
                         }
                         disabled={isPending}
-                        className="text-[#8A948D] transition hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex items-center justify-center text-[#8A948D] transition hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                         aria-label={
                           showRegisterPassword
                             ? "Sembunyikan password"
