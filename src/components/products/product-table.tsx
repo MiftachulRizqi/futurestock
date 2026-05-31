@@ -262,8 +262,8 @@ export function ProductTable({ products }: ProductTableProps) {
                 <span
                   className={
                     product.status === "active"
-                      ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-                      : "rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600"
+                      ? "inline-flex min-w-[80px] justify-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                      : "inline-flex min-w-[80px] justify-center rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600"
                   }
                 >
                   {product.status === "active" ? "Aktif" : "Nonaktif"}
