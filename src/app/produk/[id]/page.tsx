@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { getProductById } from "@/services/product-service";
@@ -34,12 +34,21 @@ export default async function ProductDetailPage({
             </p>
           </div>
 
-          <Button asChild>
-            <Link href={`/produk/${product.id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Produk
-            </Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" asChild>
+              <Link href="/produk">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Kembali
+              </Link>
+            </Button>
+
+            <Button asChild>
+              <Link href={`/produk/${product.id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit Produk
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[320px_1fr]">

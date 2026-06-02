@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/services/activity-log-service";
+import { uploadProductImage, deleteProductImage } from "@/lib/storage/image-upload";
 
 function getString(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
@@ -69,12 +70,24 @@ export async function createProductAction(formData: FormData) {
   const minStock = getNumber(formData, "min_stock");
   const price = getNumber(formData, "price");
 
+  const imageFile = formData.get("image") as File | null;
+
   if (!name || !sku || !category) {
     throw new Error("Nama produk, SKU, dan kategori wajib diisi.");
   }
 
   if (stock < 0 || minStock < 0 || price < 0) {
     throw new Error("Stok, minimum stok, dan harga tidak boleh negatif.");
+  }
+
+  // Handle image upload
+  let finalImageUrl = imageUrl || null;
+  if (imageFile && imageFile.size > 0) {
+    try {
+      finalImageUrl = await uploadProductImage(imageFile);
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : "Gagal mengupload gambar.");
+    }
   }
 
   const { data: product, error } = await supabase
@@ -86,7 +99,7 @@ export async function createProductAction(formData: FormData) {
       category,
       supplier: supplier || null,
       unit,
-      image_url: imageUrl || null,
+      image_url: finalImageUrl,
       stock,
       min_stock: minStock,
       price,
@@ -143,6 +156,8 @@ export async function updateProductAction(formData: FormData) {
   const minStock = getNumber(formData, "min_stock");
   const price = getNumber(formData, "price");
 
+  const imageFile = formData.get("image") as File | null;
+
   if (!productId) {
     throw new Error("ID produk tidak ditemukan.");
   }
@@ -157,10 +172,25 @@ export async function updateProductAction(formData: FormData) {
 
   const { data: oldProduct } = await supabase
     .from("products")
-    .select("id, name, sku, category, stock, min_stock, price, status")
+    .select("id, name, sku, category, stock, min_stock, price, status, image_url")
     .eq("id", productId)
     .eq("store_id", storeId)
     .single();
+
+  // Handle image upload
+  let finalImageUrl = imageUrl || null;
+  if (imageFile && imageFile.size > 0) {
+    try {
+      // Delete old image if exists
+      if (oldProduct?.image_url) {
+        await deleteProductImage(oldProduct.image_url);
+      }
+      // Upload new image
+      finalImageUrl = await uploadProductImage(imageFile);
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : "Gagal mengupload gambar.");
+    }
+  }
 
   const { error } = await supabase
     .from("products")
@@ -170,7 +200,7 @@ export async function updateProductAction(formData: FormData) {
       category,
       supplier: supplier || null,
       unit,
-      image_url: imageUrl || null,
+      image_url: finalImageUrl,
       stock,
       min_stock: minStock,
       price,

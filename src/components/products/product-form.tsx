@@ -32,6 +32,12 @@ export function ProductForm({
         value={product?.image_url ?? ""}
       />
 
+      <input
+        type="hidden"
+        name="existing_image_url"
+        value={product?.image_url ?? ""}
+      />
+
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
           <Label className="text-foreground">Nama Produk</Label>
