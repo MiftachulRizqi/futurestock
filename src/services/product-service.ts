@@ -26,7 +26,9 @@ export async function getProducts(): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("store_id", storeId)
-    .order("created_at", { ascending: false });
+    .order("created_at", {
+      ascending: false,
+    });
 
   if (error) {
     throw new Error(error.message);
@@ -35,7 +37,70 @@ export async function getProducts(): Promise<Product[]> {
   return data ?? [];
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
+export async function getPaginatedProducts(
+  page = 1,
+  pageSize = 10,
+  search = "",
+  category = ""
+) {
+  const supabase = await createClient();
+  const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    return {
+      products: [],
+      total: 0,
+    };
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from("products")
+    .select("*", {
+      count: "exact",
+    })
+    .eq("store_id", storeId);
+
+  if (search.trim()) {
+    query = query.or(
+      [
+        `name.ilike.%${search}%`,
+        `sku.ilike.%${search}%`,
+        `category.ilike.%${search}%`,
+        `supplier.ilike.%${search}%`,
+      ].join(",")
+    );
+  }
+
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  const {
+    data,
+    count,
+    error,
+  } = await query
+    .order("created_at", {
+      ascending: false,
+    })
+    .range(from, to);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return {
+    products: (data ?? []) as Product[],
+    total: count ?? 0,
+  };
+}
+
+export async function getProductById(
+  id: string
+): Promise<Product | null> {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
 
@@ -57,7 +122,9 @@ export async function getProductById(id: string): Promise<Product | null> {
   return data;
 }
 
-export async function createProduct(values: ProductFormValues) {
+export async function createProduct(
+  values: ProductFormValues
+) {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
 
@@ -65,20 +132,22 @@ export async function createProduct(values: ProductFormValues) {
     throw new Error("Silakan login ulang.");
   }
 
-  const { error } = await supabase.from("products").insert({
-    store_id: storeId,
-    name: values.name,
-    sku: values.sku,
-    category: values.category,
-    price: values.price,
-    stock: values.stock,
-    min_stock: values.min_stock,
-    unit: values.unit,
-    supplier: values.supplier || null,
-    barcode: values.barcode || null,
-    image_url: values.image_url || null,
-    status: values.status,
-  });
+  const { error } = await supabase
+    .from("products")
+    .insert({
+      store_id: storeId,
+      name: values.name,
+      sku: values.sku,
+      category: values.category,
+      price: values.price,
+      stock: values.stock,
+      min_stock: values.min_stock,
+      unit: values.unit,
+      supplier: values.supplier || null,
+      barcode: values.barcode || null,
+      image_url: values.image_url || null,
+      status: values.status,
+    });
 
   if (error) {
     throw new Error(error.message);
@@ -134,7 +203,9 @@ export async function updateProduct(
   revalidatePath("/prediksi-ai");
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(
+  id: string
+) {
   const supabase = await createClient();
   const storeId = await requireCurrentStoreId();
 

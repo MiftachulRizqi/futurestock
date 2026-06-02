@@ -4,6 +4,7 @@ import { getProducts } from "@/services/product-service";
 import { getLatestAiForecast } from "@/services/ai-cache-service";
 import { createSaleAction } from "../actions";
 
+
 export default async function TambahTransaksiPage() {
   const products = await getProducts();
   const latestForecast = await getLatestAiForecast();

@@ -8,9 +8,7 @@ import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Eye,
   PackageSearch,
-  Pencil,
   Search,
 } from "lucide-react";
 
@@ -18,17 +16,13 @@ import type { Product } from "@/types/product";
 
 import { formatCurrency } from "@/lib/helpers/format";
 import { Button } from "@/components/ui/button";
-import { DeleteProductButton } from "./delete-product-button";
 
-type ProductTableProps = {
+type InventoryTableProps = {
   products: Product[];
-
   currentPage: number;
   totalPages: number;
   totalProducts: number;
-
-  search: string;
-  category: string;
+  search?: string;
 };
 
 function generatePagination(
@@ -50,10 +44,21 @@ function generatePagination(
     pages.push("...");
   }
 
-  const startPage = Math.max(2, currentPage - 2);
-  const endPage = Math.min(totalPages - 1, currentPage + 2);
+  const startPage = Math.max(
+    2,
+    currentPage - 2
+  );
 
-  for (let page = startPage; page <= endPage; page++) {
+  const endPage = Math.min(
+    totalPages - 1,
+    currentPage + 2
+  );
+
+  for (
+    let page = startPage;
+    page <= endPage;
+    page++
+  ) {
     pages.push(page);
   }
 
@@ -66,33 +71,37 @@ function generatePagination(
   return pages;
 }
 
-export function ProductTable({
+export function InventoryTable({
   products,
   currentPage,
   totalPages,
   totalProducts,
   search,
-  category,
-}: ProductTableProps) {
+}: InventoryTableProps) {
 
   const router = useRouter();
 
   const [searchValue, setSearchValue] =
-    useState(search);
+    useState(() => search ?? "");
 
   useEffect(() => {
-    setSearchValue(search);
+    setSearchValue(search ?? "");
   }, [search]);
 
-  const createQueryString = (params: Record<string, string | number>) => {
+  const createQueryString = (
+    params: Record<string, string | number>
+  ) => {
     const query = new URLSearchParams();
 
-    if (search) query.set("search", search);
-    if (category) query.set("category", category);
+    if (search) {
+      query.set("search", search);
+    }
 
-    Object.entries(params).forEach(([key, value]) => {
-      query.set(key, String(value));
-    });
+    Object.entries(params).forEach(
+      ([key, value]) => {
+        query.set(key, String(value));
+      }
+    );
 
     return query.toString();
   };
@@ -107,27 +116,24 @@ export function ProductTable({
 
           <input
             type="text"
-            placeholder="Cari produk, SKU, kategori, supplier..."
-            value={searchValue}
+            placeholder="Cari produk, SKU, kategori..."
+            value={searchValue ?? ""}
             onChange={(e) => {
               const value = e.target.value;
 
               setSearchValue(value);
 
-              const params = new URLSearchParams();
+              const params =
+                new URLSearchParams();
 
               if (value) {
                 params.set("search", value);
               }
 
-              if (category) {
-                params.set("category", category);
-              }
-
               params.set("page", "1");
 
               router.push(
-                `/produk?${params.toString()}`
+                `/inventaris?${params.toString()}`
               );
             }}
             className="h-12 w-full rounded-2xl border border-border bg-background px-4 pl-11 text-sm outline-none transition focus:border-primary/40 focus:ring-4 focus:ring-primary/10"
@@ -145,7 +151,7 @@ export function ProductTable({
 
           {search && (
             <Button asChild variant="outline">
-              <Link href="/produk">
+              <Link href="/inventaris">
                 <PackageSearch className="mr-2 h-4 w-4" />
                 Reset Pencarian
               </Link>
@@ -154,11 +160,12 @@ export function ProductTable({
         </div>
       </div>
 
-      {/* INFO HEADER */}
+      {/* INFO */}
       <div className="rounded-3xl border border-border bg-card/80 p-4 shadow-sm">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Search className="h-4 w-4" />
+
             <span>
               Halaman{" "}
               <span className="font-semibold text-foreground">
@@ -192,7 +199,6 @@ export function ProductTable({
                 <th className="p-4">Stok</th>
                 <th className="p-4">Harga</th>
                 <th className="p-4">Status</th>
-                <th className="p-4 text-right">Aksi</th>
               </tr>
             </thead>
 
@@ -200,7 +206,7 @@ export function ProductTable({
               {products.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="p-10 text-center text-muted-foreground"
                   >
                     Tidak ada produk
@@ -235,6 +241,7 @@ export function ProductTable({
                           <p className="font-semibold">
                             {product.name}
                           </p>
+
                           <p className="text-xs text-muted-foreground">
                             {product.supplier || "-"}
                           </p>
@@ -248,7 +255,7 @@ export function ProductTable({
                     </td>
 
                     {/* CATEGORY */}
-                    <td className="p-4 align-middle">
+                    <td className="p-4">
                       {product.category}
                     </td>
 
@@ -257,13 +264,16 @@ export function ProductTable({
                       <div>
                         <p
                           className={
-                            product.stock <= product.min_stock
+                            product.stock <=
+                            product.min_stock
                               ? "font-semibold text-red-600"
                               : "font-semibold"
                           }
                         >
-                          {product.stock} {product.unit}
+                          {product.stock}{" "}
+                          {product.unit}
                         </p>
+
                         <p className="text-xs text-muted-foreground">
                           Min {product.min_stock}
                         </p>
@@ -272,50 +282,26 @@ export function ProductTable({
 
                     {/* PRICE */}
                     <td className="p-4 font-semibold">
-                      {formatCurrency(Number(product.price))}
+                      {formatCurrency(
+                        Number(product.price)
+                      )}
                     </td>
 
                     {/* STATUS */}
                     <td className="p-4">
                       <span
                         className={
-                          product.status === "active"
+                          product.status ===
+                          "active"
                             ? "rounded-full bg-green-100 px-3 py-1 text-xs text-green-700"
                             : "rounded-full bg-red-100 px-3 py-1 text-xs text-red-600"
                         }
                       >
-                        {product.status === "active"
+                        {product.status ===
+                        "active"
                           ? "Aktif"
                           : "Nonaktif"}
                       </span>
-                    </td>
-
-                    {/* ACTION */}
-                    <td className="p-4">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Link href={`/produk/${product.id}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
-
-                        <Button asChild size="sm">
-                          <Link
-                            href={`/produk/${product.id}/edit`}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Button>
-
-                        <DeleteProductButton
-                          productId={product.id}
-                          productName={product.name}
-                        />
-                      </div>
                     </td>
                   </tr>
                 ))
@@ -326,15 +312,18 @@ export function ProductTable({
 
         {/* PAGINATION */}
         {totalPages > 1 && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-end p-4">
             <div className="flex items-center gap-1 rounded-xl border border-border bg-card/50 p-1">
 
               {/* PREV */}
               <Link
                 href={`?${createQueryString({
-                  page: Math.max(currentPage - 1, 1),
+                  page: Math.max(
+                    currentPage - 1,
+                    1
+                  ),
                 })}`}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                   currentPage === 1
                     ? "pointer-events-none opacity-40"
                     : "hover:bg-accent"
@@ -344,30 +333,32 @@ export function ProductTable({
               </Link>
 
               {/* PAGE NUMBERS */}
-              {generatePagination(currentPage, totalPages).map(
-                (page, index) =>
-                  page === "..." ? (
-                    <span
-                      key={`ellipsis-${index}`}
-                      className="px-2 text-sm text-muted-foreground"
-                    >
-                      ...
-                    </span>
-                  ) : (
-                    <Link
-                      key={page}
-                      href={`?${createQueryString({
-                        page: page as number,
-                      })}`}
-                      className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition ${
-                        page === currentPage
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-accent"
-                      }`}
-                    >
-                      {page}
-                    </Link>
-                  )
+              {generatePagination(
+                currentPage,
+                totalPages
+              ).map((page, index) =>
+                page === "..." ? (
+                  <span
+                    key={index}
+                    className="px-2 text-sm"
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <Link
+                    key={page}
+                    href={`?${createQueryString({
+                      page: page as number,
+                    })}`}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm ${
+                      page === currentPage
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-accent"
+                    }`}
+                  >
+                    {page}
+                  </Link>
+                )
               )}
 
               {/* NEXT */}
@@ -378,7 +369,7 @@ export function ProductTable({
                     totalPages
                   ),
                 })}`}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                   currentPage === totalPages
                     ? "pointer-events-none opacity-40"
                     : "hover:bg-accent"

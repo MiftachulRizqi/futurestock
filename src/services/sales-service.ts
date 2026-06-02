@@ -53,6 +53,81 @@ export async function getSales(): Promise<SaleWithItems[]> {
   return (data ?? []) as SaleWithItems[];
 }
 
+export async function getPaginatedSales(
+  page = 1,
+  pageSize = 10,
+  search = ""
+) {
+  const supabase = await createClient();
+  const storeId = await requireCurrentStoreId();
+
+  if (!storeId) {
+    return {
+      sales: [],
+      total: 0,
+    };
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from("sales")
+    .select(
+      `
+      *,
+      sales_items (
+        *,
+        products (
+          id,
+          store_id,
+          name,
+          sku,
+          category,
+          stock,
+          min_stock,
+          price,
+          unit,
+          status
+        )
+      )
+    `,
+      {
+        count: "exact",
+      }
+    )
+    .eq("store_id", storeId);
+
+  if (search.trim()) {
+    query = query.or(
+      [
+        `invoice_number.ilike.%${search}%`,
+        `customer_name.ilike.%${search}%`,
+        `payment_method.ilike.%${search}%`,
+      ].join(",")
+    );
+  }
+
+  const {
+    data,
+    count,
+    error,
+  } = await query
+    .order("sale_date", {
+      ascending: false,
+    })
+    .range(from, to);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return {
+    sales: (data ?? []) as SaleWithItems[],
+    total: count ?? 0,
+  };
+}
+
 export async function createSale(input: {
   customer_name?: string;
   payment_method: string;
