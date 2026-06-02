@@ -222,6 +222,7 @@ export function ProductTable({
                               alt={product.name}
                               width={40}
                               height={40}
+                              unoptimized
                               className="h-10 w-10 object-cover"
                             />
                           ) : (
@@ -305,7 +306,9 @@ export function ProductTable({
 
                         <Button asChild size="sm">
                           <Link
-                            href={`/produk/${product.id}/edit`}
+                            href={`/produk/${product.id}/edit?${createQueryString({
+                              page: currentPage,
+                            })}`}
                           >
                             <Pencil className="h-4 w-4" />
                           </Link>

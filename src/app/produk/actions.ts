@@ -62,6 +62,7 @@ export async function createProductAction(formData: FormData) {
   const sku = getString(formData, "sku");
   const category = getString(formData, "category");
   const supplier = getString(formData, "supplier");
+  const barcode = getString(formData, "barcode");
   const unit = getString(formData, "unit") || "pcs";
   const imageUrl = getString(formData, "image_url");
   const status = getString(formData, "status") || "active";
@@ -98,6 +99,7 @@ export async function createProductAction(formData: FormData) {
       sku,
       category,
       supplier: supplier || null,
+      barcode: barcode || null,
       unit,
       image_url: finalImageUrl,
       stock,
@@ -148,6 +150,7 @@ export async function updateProductAction(formData: FormData) {
   const sku = getString(formData, "sku");
   const category = getString(formData, "category");
   const supplier = getString(formData, "supplier");
+  const barcode = getString(formData, "barcode");
   const unit = getString(formData, "unit") || "pcs";
   const imageUrl = getString(formData, "image_url");
   const status = getString(formData, "status") || "active";
@@ -155,6 +158,15 @@ export async function updateProductAction(formData: FormData) {
   const stock = getNumber(formData, "stock");
   const minStock = getNumber(formData, "min_stock");
   const price = getNumber(formData, "price");
+
+  const page =
+    getString(formData, "page") || "1";
+
+  const search =
+    getString(formData, "search");
+
+  const currentCategory =
+    getString(formData, "current_category");
 
   const imageFile = formData.get("image") as File | null;
 
@@ -199,6 +211,7 @@ export async function updateProductAction(formData: FormData) {
       sku,
       category,
       supplier: supplier || null,
+      barcode: barcode || null,
       unit,
       image_url: finalImageUrl,
       stock,
@@ -241,7 +254,21 @@ export async function updateProductAction(formData: FormData) {
   revalidatePath(`/produk/${productId}`);
   revalidatePath(`/produk/${productId}/edit`);
 
-  redirect("/produk?toast=product-updated");
+  const params = new URLSearchParams();
+
+  params.set("page", page);
+
+  if (search) {
+    params.set("search", search);
+  }
+
+  if (currentCategory) {
+    params.set("category", currentCategory);
+  }
+
+  params.set("toast", "product-updated");
+
+  redirect(`/produk?${params.toString()}`);
 }
 
 export async function deleteProductWithResultAction(formData: FormData) {

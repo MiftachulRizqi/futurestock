@@ -29,6 +29,11 @@ export async function saveAiForecast(params: {
 }) {
   const supabase = await createClient();
 
+  const now = new Date();
+
+  // TESTING CEPAT 30 DETIK
+  const end = new Date(now.getTime() + 30 * 1000);
+
   const { error } = await supabase
     .from("ai_forecasts")
     .insert({
@@ -36,6 +41,9 @@ export async function saveAiForecast(params: {
       forecast_data: params.forecast,
       total_products: params.totalProducts,
       total_transactions: params.totalTransactions,
+
+      forecast_start_date: now.toISOString(),
+      forecast_end_date: end.toISOString(),
     });
 
   if (error) {

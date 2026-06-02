@@ -11,6 +11,8 @@ import {
   Target,
 } from "lucide-react";
 
+import { evaluateForecastAccuracy } from "@/lib/helpers/evaluate-forecast-accuracy";
+import { processForecastAccuracy } from "@/lib/helpers/process-forecast-accuracy";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GlassPanel } from "@/components/shared/glass-panel";
 import { OverstockPromoAlert } from "@/components/dashboard/overstock-promo-alert";
@@ -20,12 +22,15 @@ import { InventoryEmptyState } from "@/components/states/inventory-empty-state";
 import { getProducts } from "@/services/product-service";
 import { getSales } from "@/services/sales-service";
 import { getSalesSummaryForAi } from "@/lib/helpers/sales-summary";
-import { getForecastAccuracy } from "@/lib/helpers/forecast-accuracy";
 import { getSmartAiForecastWithMeta } from "@/services/ai-orchestrator";
 import { regenerateAiForecastAction } from "./actions";
 
 import type { AiForecastProduct } from "@/types/ai-forecast";
 import type { AiForecastSource } from "@/services/ai-orchestrator";
+
+import {
+  getForecastAccuracy,
+} from "@/lib/helpers/forecast-accuracy";
 
 export default async function PrediksiAiPage() {
   const products = await getProducts();
@@ -79,7 +84,9 @@ export default async function PrediksiAiPage() {
   });
 
   const forecast = forecastResult.forecast;
-  const forecastAccuracy = getForecastAccuracy(products, sales);
+  await evaluateForecastAccuracy();
+
+  const forecastAccuracy = await getForecastAccuracy();
 
   return (
     <DashboardLayout>

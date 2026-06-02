@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+
 import type { Product } from "@/types/product";
 
 import { Button } from "@/components/ui/button";
@@ -10,20 +11,32 @@ type ProductFormProps = {
   action: (formData: FormData) => void;
   product?: Product;
   submitLabel: string;
+
+  currentPage?: number;
+  currentSearch?: string;
+  currentCategory?: string;
 };
 
 export function ProductForm({
   action,
   product,
   submitLabel,
+  currentPage,
+  currentSearch,
+  currentCategory,
 }: ProductFormProps) {
   return (
     <form
       action={action}
       className="space-y-6 rounded-2xl border border-border bg-card/70 p-6"
     >
+
       {product ? (
-        <input type="hidden" name="product_id" value={product.id} />
+        <input
+          type="hidden"
+          name="product_id"
+          value={product.id}
+        />
       ) : null}
 
       <input
@@ -38,9 +51,33 @@ export function ProductForm({
         value={product?.image_url ?? ""}
       />
 
+      {/* PAGINATION STATE */}
+      <input
+        type="hidden"
+        name="page"
+        value={currentPage ?? 1}
+      />
+
+      <input
+        type="hidden"
+        name="search"
+        value={currentSearch ?? ""}
+      />
+
+      <input
+        type="hidden"
+        name="current_category"
+        value={currentCategory ?? ""}
+      />
+
       <div className="grid gap-5 md:grid-cols-2">
+
+        {/* NAME */}
         <div className="space-y-2">
-          <Label className="text-foreground">Nama Produk</Label>
+          <Label className="text-foreground">
+            Nama Produk
+          </Label>
+
           <Input
             name="name"
             defaultValue={product?.name}
@@ -50,8 +87,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* SKU */}
         <div className="space-y-2">
-          <Label className="text-foreground">SKU</Label>
+          <Label className="text-foreground">
+            SKU
+          </Label>
+
           <Input
             name="sku"
             defaultValue={product?.sku}
@@ -61,8 +102,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* CATEGORY */}
         <div className="space-y-2">
-          <Label className="text-foreground">Kategori</Label>
+          <Label className="text-foreground">
+            Kategori
+          </Label>
+
           <select
             name="category"
             defaultValue={product?.category ?? ""}
@@ -82,8 +127,12 @@ export function ProductForm({
           </select>
         </div>
 
+        {/* PRICE */}
         <div className="space-y-2">
-          <Label className="text-foreground">Harga</Label>
+          <Label className="text-foreground">
+            Harga
+          </Label>
+
           <Input
             name="price"
             type="number"
@@ -94,8 +143,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* STOCK */}
         <div className="space-y-2">
-          <Label className="text-foreground">Stok</Label>
+          <Label className="text-foreground">
+            Stok
+          </Label>
+
           <Input
             name="stock"
             type="number"
@@ -106,8 +159,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* MIN STOCK */}
         <div className="space-y-2">
-          <Label className="text-foreground">Minimal Stok</Label>
+          <Label className="text-foreground">
+            Minimal Stok
+          </Label>
+
           <Input
             name="min_stock"
             type="number"
@@ -118,8 +175,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* UNIT */}
         <div className="space-y-2">
-          <Label className="text-foreground">Satuan</Label>
+          <Label className="text-foreground">
+            Satuan
+          </Label>
+
           <Input
             name="unit"
             defaultValue={product?.unit ?? "pcs"}
@@ -129,8 +190,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* SUPPLIER */}
         <div className="space-y-2">
-          <Label className="text-foreground">Supplier</Label>
+          <Label className="text-foreground">
+            Supplier
+          </Label>
+
           <Input
             name="supplier"
             defaultValue={product?.supplier ?? ""}
@@ -139,8 +204,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* BARCODE */}
         <div className="space-y-2">
-          <Label className="text-foreground">Barcode</Label>
+          <Label className="text-foreground">
+            Barcode
+          </Label>
+
           <Input
             name="barcode"
             defaultValue={product?.barcode ?? ""}
@@ -149,8 +218,12 @@ export function ProductForm({
           />
         </div>
 
+        {/* STATUS */}
         <div className="space-y-2">
-          <Label className="text-foreground">Status</Label>
+          <Label className="text-foreground">
+            Status
+          </Label>
+
           <select
             name="status"
             defaultValue={product?.status ?? "active"}
@@ -161,8 +234,11 @@ export function ProductForm({
           </select>
         </div>
 
+        {/* IMAGE */}
         <div className="space-y-3 md:col-span-2">
-          <Label className="text-foreground">Foto Produk</Label>
+          <Label className="text-foreground">
+            Foto Produk
+          </Label>
 
           {product?.image_url ? (
             <div className="relative h-40 w-40 overflow-hidden rounded-2xl border border-border bg-card/5">
@@ -185,13 +261,15 @@ export function ProductForm({
           />
 
           <p className="text-xs text-muted-foreground">
-            Kosongkan jika tidak ingin mengganti foto. Upload JPG, PNG, atau
-            WEBP maksimal 5MB.
+            Kosongkan jika tidak ingin mengganti foto.
+            Upload JPG, PNG, atau WEBP maksimal 5MB.
           </p>
         </div>
+
       </div>
 
       <div className="flex justify-end gap-3">
+
         <Link href="/produk">
           <Button
             type="button"
@@ -201,7 +279,11 @@ export function ProductForm({
             Batal
           </Button>
         </Link>
-        <Button type="submit">{submitLabel}</Button>
+
+        <Button type="submit">
+          {submitLabel}
+        </Button>
+
       </div>
     </form>
   );
