@@ -141,28 +141,26 @@ export default async function AktivitasPage({
                     {generatePagination(
                       currentPage,
                       totalPages
-                    ).map((page, index) =>
-                      page === "..." ? (
-                        <span
-                          key={index}
-                          className="px-2 text-sm text-muted-foreground"
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <Link
-                          key={page}
-                          href={`/aktivitas?page=${page}`}
-                          className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition ${
-                            page === currentPage
-                              ? "bg-primary text-primary-foreground"
-                              : "hover:bg-accent"
-                          }`}
-                        >
-                          {page}
-                        </Link>
-                      )
-                    )}
+                    ).map((page, index) => (
+                      <span key={`${page}-${index}`}>
+                        {page === "..." ? (
+                          <span className="px-2 text-sm text-muted-foreground">
+                            ...
+                          </span>
+                        ) : (
+                          <Link
+                            href={`/aktivitas?page=${page}`}
+                            className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition ${
+                              page === currentPage
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-accent"
+                            }`}
+                          >
+                            {page}
+                          </Link>
+                        )}
+                      </span>
+                    ))}
 
                     <Link
                       href={`/aktivitas?page=${Math.min(
