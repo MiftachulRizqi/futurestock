@@ -1,5 +1,6 @@
 import { gemini } from "@/lib/ai/gemini";
 import type { AiForecastResult } from "@/types/ai-forecast";
+import { getUpcomingHolidays, formatHolidayForPrompt } from "@/lib/helpers/indonesian-holidays";
 
 type SalesSummaryItem = {
   product_id: string;
@@ -19,14 +20,20 @@ type SalesSummaryItem = {
 };
 
 function buildForecastPrompt(salesSummary: SalesSummaryItem[], currentDate: string) {
+  const upcomingHolidays = getUpcomingHolidays(30);
+  const holidayContext = formatHolidayForPrompt(upcomingHolidays);
+
   return `
 Kamu adalah AI inventory forecasting analyst senior untuk aplikasi FutureStock di Indonesia.
 
 TANGGAL HARI INI: ${currentDate}
 
+DATA HARI BESAR INDONESIA (AKURAT - GUNAKAN DATA INI, JANGAN MENEBAK):
+${holidayContext}
+
 Tugas AI:
-1. Analisis apakah ada hari besar keagamaan, nasional, atau event musiman di Indonesia dalam 30 hari ke depan dari tanggal hari ini.
-2. Jika ADA HARI BESAR: Tentukan nama, prediksi multiplier demand, dan kategori produk yang terdampak. Kalikan hasil prediksi demand produk tersebut dengan multiplier. Set holiday_affected menjadi true.
+1. Gunakan DATA HARI BESAR di atas untuk menentukan apakah ada hari besar dalam 30 hari ke depan.
+2. Jika ADA HARI BESAR: Gunakan nama, multiplier, dan kategori terdampak dari data di atas. Kalikan hasil prediksi demand produk yang kategorinya cocok dengan multiplier tersebut. Set holiday_affected menjadi true.
 3. Jika TIDAK ADA HARI BESAR: Set has_upcoming_holiday menjadi false, set semua multiplier menjadi null, dan pastikan holiday_affected pada semua produk diset false.
 4. Analisis tren penjualan untuk memprediksi demand SEMUA PRODUK tanpa terkecuali untuk minggu depan ke dalam array "all_product_predictions".
 5. Berikan rekomendasi stok ideal dan warning overstock.
@@ -36,6 +43,7 @@ Aturan Ketat:
 - Jawab HANYA menggunakan format JSON valid tanpa format markdown.
 - Gunakan Bahasa Indonesia.
 - promo_recommendation: HARUS BERUPA TEKS SINGKAT STRING BUKAN OBJEK.
+- JANGAN MENEBAK TANGGAL HARI BESAR - Gunakan data yang diberikan di atas.
 
 Data sales summary (JSON):
 ${JSON.stringify(salesSummary, null, 2)}
