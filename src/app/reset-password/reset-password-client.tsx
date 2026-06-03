@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-type ResetStatus = "checking" | "ready" | "success" | "error";
+type ResetStatus = "ready" | "success" | "error";
 
 export function ResetPasswordClient() {
-  const [status, setStatus] = useState<ResetStatus>("checking");
+  const [status, setStatus] = useState<ResetStatus>("ready");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -28,64 +28,18 @@ export function ResetPasswordClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    async function prepareSession() {
-      const supabase = createClient();
-
-      setStatus("checking");
-      setMessage("");
-
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-        if (error) {
-          setStatus("error");
-          setMessage(
-            "Link reset password tidak valid atau sudah kedaluwarsa. Silakan minta link reset ulang."
-          );
-          return;
-        }
-
-        window.history.replaceState(null, "", "/reset-password");
-      }
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        setStatus("error");
-        setMessage(
-          "Link reset password tidak valid atau sudah kedaluwarsa. Silakan minta link reset ulang."
-        );
-        return;
-      }
-
-      setStatus("ready");
-    }
-
-    prepareSession();
-  }, []);
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const supabase = createClient();
 
     const trimmedPassword = password.trim();
     const trimmedConfirmPassword = confirmPassword.trim();
 
     if (trimmedPassword.length < 6) {
-      setStatus("ready");
       setMessage("Password minimal 6 karakter.");
       return;
     }
 
     if (trimmedPassword !== trimmedConfirmPassword) {
-      setStatus("ready");
       setMessage("Konfirmasi password belum sama.");
       return;
     }
@@ -93,30 +47,34 @@ export function ResetPasswordClient() {
     setPending(true);
     setMessage("");
 
-    const { error } = await supabase.auth.updateUser({
-      password: trimmedPassword,
-    });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        password: trimmedPassword,
+      });
 
-    setPending(false);
+      if (error) {
+        setMessage(error.message || "Password belum berhasil diperbarui.");
+        setPending(false);
+        return;
+      }
 
-    if (error) {
-      setStatus("ready");
-      setMessage(error.message || "Password belum berhasil diperbarui.");
-      return;
+      setPassword("");
+      setConfirmPassword("");
+      setStatus("success");
+      setMessage("Password berhasil diperbarui. Silakan login kembali.");
+      await supabase.auth.signOut();
+    } catch (err) {
+      setMessage("Terjadi kesalahan sistem, silakan coba lagi.");
+      console.error(err);
+    } finally {
+      setPending(false);
     }
+  };
 
-    setPassword("");
-    setConfirmPassword("");
-    setStatus("success");
-    setMessage("Password berhasil diperbarui. Silakan login kembali.");
-
-    await supabase.auth.signOut();
-  }
-
-  const isChecking = status === "checking";
+  const canSubmit = status === "ready" && !pending;
   const isSuccess = status === "success";
   const isError = status === "error";
-  const canSubmit = status === "ready" && !pending;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#F5FAF5] px-4 py-8 text-[#102418] md:px-6 lg:px-8">
@@ -137,41 +95,17 @@ export function ResetPasswordClient() {
                 </h1>
 
                 <p className="text-sm font-medium leading-relaxed text-[#5E6761] md:text-base">
-                  Masukkan password baru untuk akun FutureStock Anda. Gunakan
-                  password yang kuat agar workspace inventory tetap aman.
+                  Masukkan password baru untuk akun FutureStock Anda. Gunakan password yang kuat agar workspace inventory tetap aman.
                 </p>
               </div>
 
-              {isChecking ? (
-                <div className="rounded-3xl border border-emerald-100 bg-emerald-50/70 px-5 py-5">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
-                    <Leaf className="h-5 w-5 animate-pulse" />
-                  </div>
-
-                  <h2 className="text-lg font-extrabold text-[#102418]">
-                    Memeriksa link reset
-                  </h2>
-
-                  <p className="mt-2 text-sm font-medium leading-relaxed text-[#5E6761]">
-                    Tunggu sebentar, sistem sedang memvalidasi link reset
-                    password Anda.
-                  </p>
-                </div>
-              ) : null}
-
-              {!isChecking && message ? (
-                <div
-                  className={`mb-5 rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed ${
-                    isSuccess
-                      ? "border border-emerald-100 bg-emerald-50 text-emerald-700"
-                      : "border border-red-100 bg-red-50 text-red-700"
-                  }`}
-                >
+              {message && (
+                <div className={`mb-5 rounded-2xl px-4 py-3 text-sm font-semibold leading-relaxed ${isSuccess ? "border border-emerald-100 bg-emerald-50 text-emerald-700" : "border border-red-100 bg-red-50 text-red-700"}`}>
                   {message}
                 </div>
-              ) : null}
+              )}
 
-              {status === "ready" ? (
+              {status === "ready" && (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <PasswordInput
                     label="Password Baru"
@@ -188,16 +122,13 @@ export function ResetPasswordClient() {
                     value={confirmPassword}
                     onChange={setConfirmPassword}
                     show={showConfirmPassword}
-                    onToggleShow={() =>
-                      setShowConfirmPassword((prev) => !prev)
-                    }
+                    onToggleShow={() => setShowConfirmPassword((prev) => !prev)}
                     placeholder="Ulangi password baru"
                     disabled={pending}
                   />
 
                   <p className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-semibold leading-relaxed text-amber-700">
-                    Password minimal 6 karakter. Setelah berhasil diperbarui,
-                    Anda perlu login kembali menggunakan password baru.
+                    Password minimal 6 karakter. Setelah berhasil diperbarui, Anda perlu login kembali menggunakan password baru.
                   </p>
 
                   <button
@@ -209,9 +140,9 @@ export function ResetPasswordClient() {
                     {!pending && <CheckCircle2 className="h-4 w-4" />}
                   </button>
                 </form>
-              ) : null}
+              )}
 
-              {isSuccess || isError ? (
+              {(isSuccess || isError) && (
                 <Link
                   href={isSuccess ? "/login" : "/login?mode=forgot"}
                   className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-primary transition hover:text-primary/80"
@@ -219,7 +150,7 @@ export function ResetPasswordClient() {
                   <ArrowLeft className="h-4 w-4" />
                   {isSuccess ? "Kembali ke login" : "Minta link reset ulang"}
                 </Link>
-              ) : null}
+              )}
             </div>
           </section>
 
@@ -232,12 +163,8 @@ export function ResetPasswordClient() {
                   <ShoppingBasket className="h-7 w-7" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold tracking-tight text-[#102418]">
-                    FutureStock
-                  </p>
-                  <p className="text-sm font-medium text-primary">
-                    AI Inventory SaaS
-                  </p>
+                  <p className="text-2xl font-bold tracking-tight text-[#102418]">FutureStock</p>
+                  <p className="text-sm font-medium text-primary">AI Inventory SaaS</p>
                 </div>
               </div>
 
@@ -247,8 +174,7 @@ export function ResetPasswordClient() {
                 </h2>
 
                 <p className="mt-5 max-w-md text-sm font-medium leading-relaxed text-[#5E6761] md:text-base">
-                  Reset password membantu menjaga data stok, transaksi, dan
-                  insight bisnis tetap aman.
+                  Reset password membantu menjaga data stok, transaksi, dan insight bisnis tetap aman.
                 </p>
 
                 <div className="relative mt-8 flex min-h-[300px] items-center justify-center">
@@ -266,12 +192,9 @@ export function ResetPasswordClient() {
               </div>
 
               <div className="rounded-3xl border border-emerald-900/10 bg-white/75 p-5 shadow-sm backdrop-blur">
-                <p className="font-extrabold text-[#102418]">
-                  Secure Inventory Access
-                </p>
+                <p className="font-extrabold text-[#102418]">Secure Inventory Access</p>
                 <p className="mt-1 text-sm font-medium leading-relaxed text-[#5E6761]">
-                  Pastikan hanya pemilik akun yang dapat mengakses dashboard
-                  FutureStock.
+                  Pastikan hanya pemilik akun yang dapat mengakses dashboard FutureStock.
                 </p>
               </div>
             </div>
@@ -301,10 +224,7 @@ function PasswordInput({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-extrabold text-[#102418]">
-        {label}
-      </label>
-
+      <label className="mb-2 block text-sm font-extrabold text-[#102418]">{label}</label>
       <div className="relative">
         <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
 

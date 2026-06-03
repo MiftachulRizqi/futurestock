@@ -43,6 +43,22 @@ export default async function LaporanPage() {
           </div>
         </GlassPanel>
 
+        <GlassPanel className="p-5">
+          <h2 className="text-xl font-bold text-foreground">
+            Ringkasan Laporan
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {hasProducts
+              ? `Saat ini terdapat ${metrics.totalProducts} produk tercatat dengan estimasi nilai inventaris sebesar ${formatCurrency(
+                  metrics.inventoryValue
+                )}. Terdapat ${
+                  metrics.lowStockProducts.length
+                } produk yang perlu dipantau karena stok menipis.`
+              : "Belum ada data produk yang dapat dirangkum. Tambahkan produk terlebih dahulu agar laporan inventaris dapat dibuat."}
+          </p>
+        </GlassPanel>
+
         {!hasProducts ? (
           <InventoryEmptyState
             title="Belum ada data laporan"
@@ -80,17 +96,6 @@ export default async function LaporanPage() {
             </section>
 
             <InventoryValueChart data={getInventoryValueChartData(products)} />
-
-            <GlassPanel className="p-5">
-              <h2 className="text-xl font-bold text-foreground">
-                Ringkasan Laporan
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Laporan ini merangkum total produk, estimasi nilai inventaris,
-                dan kondisi stok yang perlu dipantau.
-              </p>
-            </GlassPanel>
           </>
         )}
       </div>

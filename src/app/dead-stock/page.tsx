@@ -1,28 +1,23 @@
-import Image from "next/image";
-import Link from "next/link";
-import { AlertTriangle, PackageCheck, PackagePlus, PackageX, Skull } from "lucide-react";
-
+// src/app/dead-stock/page.tsx
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GlassPanel } from "@/components/shared/glass-panel";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { InventoryEmptyState } from "@/components/states/inventory-empty-state";
+import { PackageCheck, PackagePlus, AlertTriangle, PackageX, Skull } from "lucide-react";
 
 import { getProducts } from "@/services/product-service";
-
-import {
-  getDeadStockProducts,
-  getDeadStockRisk,
-} from "@/lib/helpers/dead-stock";
-
 import { formatCurrency } from "@/lib/helpers/format";
+import DeadStockTable from "./dead-stock-table"; // Client Component
 
 export default async function DeadStockPage() {
   const products = await getProducts();
-  const deadStockProducts = getDeadStockProducts(products);
 
-  const deadStockValue = deadStockProducts.reduce((total, product) => {
-    return total + Number(product.price) * Number(product.stock);
-  }, 0);
+  const deadStockProducts = products.filter(p => p.stock > 0 && p.stock >= 100);
+
+  const deadStockValue = deadStockProducts.reduce(
+    (total, p) => total + Number(p.price) * Number(p.stock),
+    0
+  );
 
   const hasProducts = products.length > 0;
   const hasDeadStock = deadStockProducts.length > 0;
@@ -30,23 +25,18 @@ export default async function DeadStockPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Header */}
         <GlassPanel className="p-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.25em] text-destructive">
                 Dead Stock Intelligence
               </p>
-
-              <h1 className="mt-2 text-3xl font-bold text-foreground">
-                Dead Stock
-              </h1>
-
+              <h1 className="mt-2 text-3xl font-bold text-foreground">Dead Stock</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                Identifikasi produk nonaktif, stok kosong, atau stok berlebih
-                yang berpotensi mengunci modal usaha.
+                Produk aktif yang perlu dipromosikan, dikurangi pembeliannya, atau berisiko stok berlebih.
               </p>
             </div>
-
             <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-destructive/10 text-destructive">
               <Skull className="h-10 w-10" />
             </div>
@@ -56,7 +46,7 @@ export default async function DeadStockPage() {
         {!hasProducts ? (
           <InventoryEmptyState
             title="Belum ada produk untuk dianalisis"
-            description="Tambahkan produk terlebih dahulu agar FutureStock dapat mendeteksi risiko dead stock, stok tidak bergerak, dan potensi modal yang tertahan."
+            description="Tambahkan produk agar FutureStock dapat mendeteksi risiko dead stock."
             icon={<PackagePlus className="h-10 w-10" />}
             actionLabel="Tambah Produk"
             actionHref="/produk/tambah"
@@ -71,7 +61,6 @@ export default async function DeadStockPage() {
                 icon={PackageX}
                 tone="amber"
               />
-
               <StatCard
                 title="Nilai Terkunci"
                 value={formatCurrency(deadStockValue)}
@@ -79,7 +68,6 @@ export default async function DeadStockPage() {
                 icon={AlertTriangle}
                 tone="violet"
               />
-
               <StatCard
                 title="Total Produk"
                 value={String(products.length)}
@@ -92,85 +80,13 @@ export default async function DeadStockPage() {
             {!hasDeadStock ? (
               <InventoryEmptyState
                 title="Tidak ada dead stock terdeteksi"
-                description="Kondisi inventaris saat ini masih sehat. Produk aktif memiliki stok yang masih relevan dan belum masuk kategori risiko dead stock."
+                description="Kondisi inventaris masih sehat."
                 icon={<PackageCheck className="h-10 w-10" />}
                 actionLabel="Lihat Produk"
                 actionHref="/produk"
               />
             ) : (
-              <GlassPanel className="p-5">
-                <div className="mb-5">
-                  <h2 className="text-xl font-bold text-foreground">
-                    Daftar Produk Dead Stock
-                  </h2>
-
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Produk yang masuk daftar ini perlu dipromosikan, dikurangi
-                    pembeliannya, atau dinonaktifkan.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  {deadStockProducts.map((product) => {
-                    const risk = getDeadStockRisk(product);
-
-                    return (
-                      <Link
-                        key={product.id}
-                        href={`/produk/${product.id}`}
-                        className="flex flex-col gap-4 rounded-2xl border border-border bg-card/50 p-4 transition hover:bg-card/5 md:flex-row md:items-center md:justify-between"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="overflow-hidden rounded-2xl border border-border bg-card/5">
-                            {product.image_url ? (
-                              <Image
-                                src={product.image_url.trim()}
-                                alt={product.name}
-                                width={64}
-                                height={64}
-                                unoptimized
-                                className="h-16 w-16 object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-16 w-16 items-center justify-center text-xs text-muted-foreground">
-                                IMG
-                              </div>
-                            )}
-                          </div>
-
-                          <div>
-                            <p className="font-semibold text-foreground">
-                              {product.name}
-                            </p>
-
-                            <p className="text-sm text-muted-foreground">
-                              {product.category} · {product.sku}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span
-                            className={`rounded-full border px-3 py-1 text-xs ${risk.className}`}
-                          >
-                            {risk.label}
-                          </span>
-
-                          <span className="text-sm text-muted-foreground">
-                            Stok: {product.stock} {product.unit}
-                          </span>
-
-                          <span className="text-sm font-medium text-foreground">
-                            {formatCurrency(
-                              Number(product.price) * Number(product.stock)
-                            )}
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </GlassPanel>
+              <DeadStockTable products={deadStockProducts ?? []} />
             )}
           </>
         )}
