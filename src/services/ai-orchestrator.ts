@@ -180,64 +180,287 @@ export async function getSmartAiForecastWithMeta(params: {
   totalTransactions: number;
   forceRefresh?: boolean;
 }): Promise<AiForecastWithMeta> {
-  const latest = await getLatestAiForecast();
+
+  console.log(
+    "========== AI ORCHESTRATOR START =========="
+  );
+
+  console.log(
+    "TOTAL PRODUCTS:",
+    params.totalProducts
+  );
+
+  console.log(
+    "TOTAL TRANSACTIONS:",
+    params.totalTransactions
+  );
+
+  console.log(
+    "SALES SUMMARY COUNT:",
+    params.salesSummary.length
+  );
+
+  const latest =
+    await getLatestAiForecast();
+
+  console.log(
+    "LATEST FORECAST:",
+    latest?.id ?? "NONE"
+  );
 
   const cacheAgeHours = latest
-    ? differenceInHours(new Date(), new Date(latest.generated_at))
+    ? differenceInHours(
+        new Date(),
+        new Date(latest.generated_at)
+      )
     : null;
 
-  const isFreshCache =
-    Boolean(latest) &&
-    cacheAgeHours !== null &&
-    cacheAgeHours < 6 &&
-    latest?.total_transactions === params.totalTransactions;
+  const isFreshCache = Boolean(
+    latest &&
+      cacheAgeHours !== null &&
+      cacheAgeHours < 1
+  );
 
-  if (latest && isFreshCache && !params.forceRefresh) {
+  console.log(
+    "CACHE AGE:",
+    cacheAgeHours
+  );
+
+  console.log(
+    "IS FRESH CACHE:",
+    isFreshCache
+  );
+
+  if (
+    latest &&
+    isFreshCache &&
+    !params.forceRefresh
+  ) {
+    console.log(
+      "RETURN CACHE"
+    );
+
     return {
-      forecast: latest.forecast_data,
+      forecast:
+        latest.forecast_data,
+
       source: "cache",
-      generatedAt: latest.generated_at,
+
+      generatedAt:
+        latest.generated_at,
+
       cacheAgeHours,
+
       isFreshCache: true,
     };
   }
 
   try {
-    const forecast = await generateAiForecast(params.salesSummary);
+    console.log(
+      "STEP 1 -> GENERATE FORECAST"
+    );
+
+    const forecast =
+      await generateForecastWithRetry(
+        params.salesSummary,
+        3
+      );
+
+    console.log(
+      "STEP 2 -> GENERATE SUCCESS"
+    );
+
+    console.log(
+      "SUMMARY:",
+      forecast.summary
+    );
+
+    console.log(
+      "PREDICTIONS:",
+      forecast
+        .all_product_predictions
+        ?.length
+    );
+
+    console.log(
+      "STEP 3 -> SAVE FORECAST"
+    );
 
     await saveAiForecast({
-      summary: forecast.summary,
+      summary:
+        forecast.summary,
+
       forecast,
-      totalProducts: params.totalProducts,
-      totalTransactions: params.totalTransactions,
+
+      totalProducts:
+        params.totalProducts,
+
+      totalTransactions:
+        params.totalTransactions,
     });
+
+    console.log(
+      "STEP 4 -> SAVE SUCCESS"
+    );
 
     return {
       forecast,
+
       source: "gemini",
-      generatedAt: new Date().toISOString(),
+
+      generatedAt:
+        new Date().toISOString(),
+
       cacheAgeHours: 0,
+
       isFreshCache: false,
     };
-  } catch {
+  } 
+  
+  catch (error) {
+    console.error(
+      "========== AI ORCHESTRATOR ERROR =========="
+    );
+
+    console.error(error);
+
     if (latest) {
+      console.log(
+        "RETURN STALE CACHE"
+      );
+
       return {
-        forecast: latest.forecast_data,
-        source: "stale-cache",
-        generatedAt: latest.generated_at,
+        forecast:
+          latest.forecast_data,
+
+        source:
+          "stale-cache",
+
+        generatedAt:
+          latest.generated_at,
+
         cacheAgeHours,
+
         isFreshCache: false,
       };
     }
 
+    console.log(
+      "CREATE FALLBACK FORECAST"
+    );
+
+    const fallbackForecast =
+      createFallbackForecast(
+        params.salesSummary
+      );
+
+    try {
+      console.log(
+        "SAVE FALLBACK FORECAST"
+      );
+
+      await saveAiForecast({
+        summary:
+          fallbackForecast.summary,
+
+        forecast:
+          fallbackForecast,
+
+        totalProducts:
+          params.totalProducts,
+
+        totalTransactions:
+          params.totalTransactions,
+      });
+
+      console.log(
+        "FALLBACK SAVED"
+      );
+    } catch (saveError) {
+      console.error(
+        "FALLBACK SAVE ERROR"
+      );
+
+      console.error(saveError);
+    }
+
     return {
-      forecast: createFallbackForecast(params.salesSummary),
-      source: "fallback",
-      generatedAt: null,
+      forecast:
+        fallbackForecast,
+
+      source:
+        "fallback",
+
+      generatedAt:
+        new Date().toISOString(),
+
       cacheAgeHours: null,
+
       isFreshCache: false,
     };
   }
+}
+
+async function generateForecastWithRetry(
+  salesSummary: SalesSummaryItem[],
+  maxRetries = 3
+) {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(
+        `GEMINI ATTEMPT ${attempt}/${maxRetries}`
+      );
+
+      const result =
+        await generateAiForecast(
+          salesSummary
+        );
+
+      return result;
+    } catch (error: any) {
+      lastError = error;
+
+      const status =
+        error?.status ||
+        error?.error?.code;
+
+      console.error(
+        `GEMINI FAILED ATTEMPT ${attempt}`,
+        status
+      );
+
+      const retryable =
+        status === 429 ||
+        status === 503;
+
+      if (
+        !retryable ||
+        attempt === maxRetries
+      ) {
+        throw error;
+      }
+
+      const delay =
+        Math.pow(2, attempt) *
+        2000;
+
+      console.log(
+        `WAIT ${delay}ms BEFORE RETRY`
+      );
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            delay
+          )
+      );
+    }
+  }
+
+  throw lastError;
 }
 
 export async function getSmartAiForecast(params: {
@@ -245,7 +468,10 @@ export async function getSmartAiForecast(params: {
   totalProducts: number;
   totalTransactions: number;
 }): Promise<AiForecastResult> {
-  const result = await getSmartAiForecastWithMeta(params);
+  const result =
+    await getSmartAiForecastWithMeta(
+      params
+    );
 
   return result.forecast;
 }

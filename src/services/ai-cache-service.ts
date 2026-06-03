@@ -5,6 +5,10 @@ import type { AiForecastCache } from "@/types/ai-forecast-cache";
 export async function getLatestAiForecast(): Promise<AiForecastCache | null> {
   const supabase = await createClient();
 
+  console.log(
+    "========== GET LATEST FORECAST =========="
+  );
+
   const { data, error } = await supabase
     .from("ai_forecasts")
     .select("*")
@@ -12,7 +16,11 @@ export async function getLatestAiForecast(): Promise<AiForecastCache | null> {
       ascending: false,
     })
     .limit(1)
-    .single();
+    .maybeSingle();
+
+  console.log("CACHE DATA:", data);
+
+  console.log("CACHE ERROR:", error);
 
   if (error) {
     return null;
@@ -27,26 +35,92 @@ export async function saveAiForecast(params: {
   totalProducts: number;
   totalTransactions: number;
 }) {
+  console.log(
+    "========== SAVE FORECAST START =========="
+  );
+
   const supabase = await createClient();
 
-  const now = new Date();
+  const start = new Date();
 
-  // TESTING CEPAT 30 DETIK
-  const end = new Date(now.getTime() + 30 * 1000);
+  // TESTING
+  const end = new Date(start);
+  end.setDate(
+    end.getDate() + 2
+  );
 
-  const { error } = await supabase
-    .from("ai_forecasts")
-    .insert({
-      summary: params.summary,
-      forecast_data: params.forecast,
-      total_products: params.totalProducts,
-      total_transactions: params.totalTransactions,
+  console.log("START:", start);
 
-      forecast_start_date: now.toISOString(),
-      forecast_end_date: end.toISOString(),
-    });
+  console.log("END:", end);
+
+  console.log(
+    "TOTAL PRODUCTS:",
+    params.totalProducts
+  );
+
+  console.log(
+    "TOTAL TRANSACTIONS:",
+    params.totalTransactions
+  );
+
+  console.log(
+    "SUMMARY LENGTH:",
+    params.summary?.length
+  );
+
+  console.log(
+    "FORECAST EXISTS:",
+    !!params.forecast
+  );
+
+  const payload = {
+    summary: params.summary,
+
+    forecast_data: params.forecast,
+
+    total_products:
+      params.totalProducts,
+
+    total_transactions:
+      params.totalTransactions,
+
+    forecast_start_date:
+      start.toISOString(),
+
+    forecast_end_date:
+      end.toISOString(),
+
+    is_evaluated: false,
+  };
+
+  console.log(
+    "INSERT PAYLOAD:",
+    payload
+  );
+
+  const { data, error } =
+    await supabase
+      .from("ai_forecasts")
+      .insert(payload)
+      .select();
+
+  console.log(
+    "INSERT RESULT DATA:",
+    data
+  );
+
+  console.log(
+    "INSERT RESULT ERROR:",
+    error
+  );
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(
+      `SAVE FORECAST ERROR: ${error.message}`
+    );
   }
+
+  console.log(
+    "========== SAVE FORECAST SUCCESS =========="
+  );
 }

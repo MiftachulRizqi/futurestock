@@ -2,17 +2,13 @@ import {
   Bot,
   BrainCircuit,
   Calendar,
-  CheckCircle2,
   Clock3,
   Database,
   PackagePlus,
   ReceiptText,
   Sparkles,
-  Target,
 } from "lucide-react";
 
-import { evaluateForecastAccuracy } from "@/lib/helpers/evaluate-forecast-accuracy";
-import { processForecastAccuracy } from "@/lib/helpers/process-forecast-accuracy";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GlassPanel } from "@/components/shared/glass-panel";
 import { OverstockPromoAlert } from "@/components/dashboard/overstock-promo-alert";
@@ -27,10 +23,6 @@ import { regenerateAiForecastAction } from "./actions";
 
 import type { AiForecastProduct } from "@/types/ai-forecast";
 import type { AiForecastSource } from "@/services/ai-orchestrator";
-
-import {
-  getForecastAccuracy,
-} from "@/lib/helpers/forecast-accuracy";
 
 export default async function PrediksiAiPage() {
   const products = await getProducts();
@@ -84,9 +76,6 @@ export default async function PrediksiAiPage() {
   });
 
   const forecast = forecastResult.forecast;
-  await evaluateForecastAccuracy();
-
-  const forecastAccuracy = await getForecastAccuracy();
 
   return (
     <DashboardLayout>
@@ -99,8 +88,6 @@ export default async function PrediksiAiPage() {
           cacheAgeHours={forecastResult.cacheAgeHours}
           isFreshCache={forecastResult.isFreshCache}
         />
-
-        <ForecastAccuracyCard accuracy={forecastAccuracy} />
 
         <GlassPanel className="p-5">
           <div className="flex items-start gap-3">
@@ -118,8 +105,11 @@ export default async function PrediksiAiPage() {
           </div>
         </GlassPanel>
 
-        {forecast.promo_bundles && forecast.promo_bundles.length > 0 ? (
-          <OverstockPromoAlert promoBundles={forecast.promo_bundles} />
+        {forecast.promo_bundles &&
+        forecast.promo_bundles.length > 0 ? (
+          <OverstockPromoAlert
+            promoBundles={forecast.promo_bundles}
+          />
         ) : null}
 
         <section className="grid grid-cols-1 gap-6">
@@ -272,145 +262,6 @@ function ForecastCacheInfo({
   );
 }
 
-function ForecastAccuracyCard({
-  accuracy,
-}: {
-  accuracy: {
-    accuracy: number;
-    averageError: number;
-    comparedPoints: number;
-    actualTotal: number;
-    predictedTotal: number;
-    status: "excellent" | "good" | "needs-improvement" | "insufficient-data";
-    description: string;
-  };
-}) {
-  const isInsufficient = accuracy.status === "insufficient-data";
-
-  const statusLabel =
-    accuracy.status === "excellent"
-      ? "Sangat Baik"
-      : accuracy.status === "good"
-        ? "Baik"
-        : accuracy.status === "needs-improvement"
-          ? "Perlu Data Tambahan"
-          : "Histori Forecast Belum Cukup";
-
-  const description = isInsufficient
-    ? "Akurasi forecast akan dihitung otomatis setelah FutureStock memiliki minimal 2 periode forecast dan data penjualan aktual yang cukup untuk dibandingkan."
-    : accuracy.description;
-
-  return (
-    <GlassPanel className="p-5">
-      <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Target className="h-6 w-6" />
-          </div>
-
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
-              Forecast Accuracy
-            </p>
-
-            <h2 className="mt-1 text-xl font-bold text-foreground">
-              Akurasi Prediksi Penjualan
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {description}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-border bg-card/40 p-5 text-center md:min-w-47.5">
-          <p className="text-sm text-muted-foreground">Status</p>
-
-          {isInsufficient ? (
-            <>
-              <p className="mt-2 text-lg font-bold text-amber-500">
-                Menunggu Data
-              </p>
-
-              <p className="mt-2 text-xs font-semibold text-muted-foreground">
-                {statusLabel}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="mt-2 text-4xl font-bold text-primary">
-                {accuracy.accuracy}%
-              </p>
-
-              <p className="mt-2 text-xs font-semibold text-muted-foreground">
-                {statusLabel}
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {isInsufficient ? (
-        <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/5 p-4">
-          <div className="space-y-3">
-            <p className="font-medium text-foreground">
-              Sistem sedang mengumpulkan histori forecast.
-            </p>
-
-            <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-2">
-              <ReadinessItem text="Prediksi AI aktif" />
-              <ReadinessItem text="Transaksi penjualan tercatat" />
-              <ReadinessItem text="Sistem siap menghitung akurasi" />
-              <ReadinessItem text="Akurasi aktif otomatis saat data cukup" />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
-        <AccuracyMiniStat label="Aktual" value={`${accuracy.actualTotal} unit`} />
-
-        <AccuracyMiniStat
-          label="Prediksi"
-          value={`${accuracy.predictedTotal} unit`}
-        />
-
-        <AccuracyMiniStat
-          label="Rata-rata Error"
-          value={`${accuracy.averageError} unit`}
-        />
-      </div>
-    </GlassPanel>
-  );
-}
-
-function ReadinessItem({ text }: { text: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function AccuracyMiniStat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-card/40 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-
-      <p className="mt-2 text-lg font-bold text-foreground">{value}</p>
-    </div>
-  );
-}
-
 function ForecastSection({
   title,
   description,
@@ -535,10 +386,11 @@ function ForecastSection({
                           </div>
                         )}
 
-                        {item.promo_recommendation && (
-                          <div className="text-emerald-500">
-                            💡 {item.promo_recommendation}
-                          </div>
+                        {item.promo_recommendation &&
+                          item.promo_recommendation.trim().toLowerCase() !== "null" && (
+                            <div className="text-emerald-500">
+                              💡 {item.promo_recommendation}
+                            </div>
                         )}
 
                         {!item.holiday_affected &&
