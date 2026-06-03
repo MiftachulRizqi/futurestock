@@ -89,7 +89,7 @@ export function getIndonesianHolidays(year: number): Holiday[] {
   if (year === 2026) {
     holidays.push(
       {
-        name: "Tahun Baru Islam 1447 H",
+        name: "Tahun Baru Islam 1448 H",
         date: "2026-06-16",
         category: "keagamaan",
         affected_categories: ["Makanan", "Minuman", "Fashion"],
