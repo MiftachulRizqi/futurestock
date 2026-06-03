@@ -21,8 +21,11 @@ export default async function LaporanPage() {
   return (
     <DashboardLayout products={products}>
       <div className="space-y-6">
+
+        {/* HEADER */}
         <GlassPanel className="p-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">
                 Reports Center

@@ -123,6 +123,11 @@ export default async function DashboardPage() {
             lowStockCount={metrics.lowStockProducts.length}
             inactiveCount={metrics.inactiveProducts.length}
           />
+
+          <EcoImpactIndicator
+            totalProducts={metrics.totalProducts}
+            lowStockCount={metrics.lowStockProducts.length}
+          />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
